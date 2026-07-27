@@ -1,0 +1,25 @@
+create header {
+   create menu [
+      Home = "Home";
+      About = "About";
+      Contact = "Contact";
+   ]
+
+   menu.design {
+      background = Black ;
+      text.color = White;
+      Font = Space Grotesk;
+      menu.center = true;
+      menu.OnHover = popup.animation;
+   }
+
+create hero {
+   create slider [
+      placeholder.Image = "https://cdn.britannica.com/92/212692-050-D53981F5/labradoodle-dog-stick-running-grass.jpg?w=300";
+      Image.effect = blur-5%;
+      text.Header = "This is a dog";
+      button.Header = "Click the dog";
+      text&button = onTop - Header ;
+   ]
+}
+}

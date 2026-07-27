@@ -1,0 +1,11 @@
+# dependencies — restored with `npm install`
+node_modules/
+
+# compiled imagination — regenerated on every Run
+output/
+
+# logs & OS noise
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db

@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ImagineCode — workspace</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23b180f0'/%3E%3Cstop offset='.5' stop-color='%23f08bd4'/%3E%3Cstop offset='1' stop-color='%236ea8fe'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath fill='url(%23g)' d='M12 1l2.4 6.6L21 10l-6.6 2.4L12 19l-2.4-6.6L3 10l6.6-2.4z'/%3E%3Ccircle fill='url(%23g)' cx='19' cy='19' r='2.4'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Schibsted+Grotesk:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Fragment+Mono:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="noise" aria-hidden="true"></div>
+
+<!-- ═══════════════ TITLE BAR ═══════════════ -->
+<header id="titlebar">
+  <div class="tb-left">
+    <span class="tb-logo" aria-hidden="true">✦</span>
+    <nav id="menubar">
+      <div class="menu" data-menu="file"><span class="menu-title">File</span></div>
+      <div class="menu" data-menu="edit"><span class="menu-title">Edit</span></div>
+      <div class="menu" data-menu="view"><span class="menu-title">View</span></div>
+      <div class="menu" data-menu="run"><span class="menu-title">Run</span></div>
+      <div class="menu" data-menu="help"><span class="menu-title">Help</span></div>
+    </nav>
+  </div>
+  <div class="tb-center" id="tb-title">workspace — ImagineCode</div>
+  <div class="tb-right" aria-hidden="true">
+    <span class="tb-hint">imagination&nbsp;→&nbsp;software</span>
+  </div>
+</header>
+
+<!-- ═══════════════ MAIN ═══════════════ -->
+<div id="main">
+
+  <!-- activity bar -->
+  <aside id="activitybar">
+    <div class="ab-top">
+      <button class="ab-item active" data-view="explorer" title="Explorer (Ctrl+Shift+E)"></button>
+      <button class="ab-item" data-view="search" title="Search"></button>
+      <button class="ab-item" data-view="run-view" title="Run Imagination (Ctrl+Enter)"></button>
+    </div>
+    <div class="ab-bottom">
+      <button class="ab-item" id="ab-claude" title="Claude Code connection"></button>
+      <button class="ab-item" id="ab-settings" title="Settings"></button>
+    </div>
+  </aside>
+
+  <!-- sidebar -->
+  <aside id="sidebar">
+    <!-- EXPLORER -->
+    <div class="side-view active" id="view-explorer">
+      <div class="side-header">
+        <span class="side-title">Explorer</span>
+        <div class="side-actions">
+          <button class="icon-btn" id="btn-new-file" title="New Imagination File"></button>
+          <button class="icon-btn" id="btn-new-folder" title="New Folder"></button>
+          <button class="icon-btn" id="btn-refresh" title="Refresh Explorer"></button>
+          <button class="icon-btn" id="btn-collapse" title="Collapse Folders"></button>
+        </div>
+      </div>
+      <div class="section-header" id="ws-header">
+        <span class="chev down"></span><span class="section-name">IMAGINATION</span>
+      </div>
+      <div id="file-tree" class="file-tree"></div>
+      <div class="explorer-hint">
+        <span class="hint-spark">✦</span> name files anything —<br><code>app.dream</code>, <code>site.magic</code>, <code>me.pizza</code>…<br>your extension, your language.
+      </div>
+    </div>
+
+    <!-- SEARCH -->
+    <div class="side-view" id="view-search">
+      <div class="side-header"><span class="side-title">Search</span></div>
+      <div class="search-box">
+        <input id="search-input" type="text" placeholder="Search imagination…" spellcheck="false">
+      </div>
+      <div id="search-results" class="search-results"></div>
+    </div>
+  </aside>
+
+  <div id="sidebar-resizer"></div>
+
+  <!-- editor region -->
+  <section id="editor-region">
+    <div id="editor-col">
+      <div id="tabbar-row">
+        <div id="tabbar"></div>
+        <div id="editor-actions">
+          <button class="icon-btn" id="btn-split-preview" title="Toggle Preview Panel"></button>
+          <button class="run-btn" id="btn-run" title="Run Imagination (Ctrl+Enter / F5)">
+            <span class="run-icon"></span><span class="run-label">Run</span>
+          </button>
+        </div>
+      </div>
+      <div id="breadcrumbs"></div>
+
+      <div id="editor-stack">
+        <div id="monaco-host"></div>
+
+        <!-- WELCOME -->
+        <div id="welcome" class="stack-page">
+          <div class="welcome-inner">
+            <div class="welcome-hero">
+              <h1><span class="w-imagine">Imagine</span><span class="w-code">Code</span></h1>
+              <p class="w-tag">The IDE for programming languages that don't exist yet.</p>
+            </div>
+            <div class="welcome-cols">
+              <div class="w-col">
+                <h2>Start</h2>
+                <button class="w-link" id="w-connect"><span class="wl-ico">⚡</span> Connect Claude Code</button>
+                <button class="w-link" id="w-new"><span class="wl-ico">✦</span> New imagination file…</button>
+                <button class="w-link" id="w-run"><span class="wl-ico">▶</span> Run the example</button>
+                <h2 style="margin-top:26px">Recent</h2>
+                <div id="w-recent"></div>
+              </div>
+              <div class="w-col">
+                <h2>How it works</h2>
+                <div class="w-step"><span class="w-step-n">1</span><div><strong>Invent a language.</strong><br>Write code the way you imagine code should look. Any syntax. Any file extension. There are no rules and no errors.</div></div>
+                <div class="w-step"><span class="w-step-n">2</span><div><strong>Press Run.</strong><br>Claude Code reads your imagination like a compiler reads source — and builds a real website from it.</div></div>
+                <div class="w-step"><span class="w-step-n">3</span><div><strong>Watch it exist.</strong><br>A live preview opens right here in the IDE. Change your language, run again, dream bigger.</div></div>
+                <div class="w-quote">“there are no syntax errors in imagination.”<span> — the compiler</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SETTINGS -->
+        <div id="settings-page" class="stack-page">
+          <div class="settings-inner">
+            <h1>Settings</h1>
+            <p class="settings-sub">Compiler behaviour for this workspace. Saved automatically.</p>
+
+            <div class="set-group">
+              <h2>Entry File</h2>
+              <p class="set-desc">The program the compiler starts from. Every other file is a module — included only when the entry file references it by name.</p>
+              <select id="set-entry" class="set-select"></select>
+            </div>
+
+            <div class="set-group">
+              <h2>Output Format</h2>
+              <p class="set-desc">What the compiler should build from your imagination.</p>
+              <div class="fmt-cards">
+                <label class="fmt-card"><input type="radio" name="fmt" value="html">
+                  <span class="fmt-title">&lt;/&gt; HTML</span>
+                  <span class="fmt-desc">One self-contained page. Fastest, works everywhere.</span>
+                </label>
+                <label class="fmt-card"><input type="radio" name="fmt" value="react">
+                  <span class="fmt-title">⚛ React</span>
+                  <span class="fmt-desc">Real React components with hooks, rendered live via CDN.</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="set-group">
+              <h2>Compiler Model</h2>
+              <p class="set-desc">Which Claude does the imagining-to-existence work.</p>
+              <div id="model-list" class="model-list"></div>
+            </div>
+
+            <div class="set-group">
+              <h2>Standing Build Notes</h2>
+              <p class="set-desc">Whispered to the compiler on every build — style preferences, vibes, rules of your universe.</p>
+              <textarea id="set-notes" rows="4" spellcheck="false" placeholder="e.g. always dark mode. everything slightly magical. never use the color beige."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- EMPTY STATE -->
+        <div id="empty-editor" class="stack-page">
+          <div class="empty-inner">
+            <div class="empty-spark">✦</div>
+            <p>No file open</p>
+            <p class="empty-keys"><kbd>Ctrl</kbd>+<kbd>P</kbd> open file &nbsp;·&nbsp; <kbd>Ctrl</kbd>+<kbd>Enter</kbd> run imagination</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="preview-resizer" class="hidden"></div>
+
+    <!-- PREVIEW -->
+    <div id="preview-col" class="hidden">
+      <div id="preview-header">
+        <span class="pv-dot"></span>
+        <span class="pv-title">PREVIEW</span>
+        <span class="pv-url" id="pv-url">localhost/preview/</span>
+        <div class="side-actions">
+          <button class="icon-btn" id="pv-refresh" title="Reload Preview"></button>
+          <button class="icon-btn" id="pv-external" title="Open in Browser"></button>
+          <button class="icon-btn" id="pv-close" title="Close Preview"></button>
+        </div>
+      </div>
+      <iframe id="preview-frame" src="/preview/" title="Imagination preview"></iframe>
+    </div>
+  </section>
+</div>
+
+<!-- ═══════════════ TERMINAL PANEL ═══════════════ -->
+<div id="panel-resizer"></div>
+<div id="panel">
+  <div id="panel-header">
+    <div class="panel-tabs">
+      <span class="panel-tab">Problems <span class="badge-zero">0</span></span>
+      <span class="panel-tab active">Imagine&nbsp;Terminal</span>
+      <span class="panel-tab">Output</span>
+    </div>
+    <div class="side-actions">
+      <button class="icon-btn" id="term-stop" title="Stop Build"></button>
+      <button class="icon-btn" id="term-clear" title="Clear Terminal"></button>
+      <button class="icon-btn" id="term-close" title="Hide Panel (Ctrl+`)"></button>
+    </div>
+  </div>
+  <div id="terminal"></div>
+</div>
+
+<!-- ═══════════════ STATUS BAR ═══════════════ -->
+<footer id="statusbar">
+  <div class="sb-left">
+    <span class="sb-item sb-claude" id="sb-claude"><span class="sb-zap">⚡</span> Connect Claude Code</span>
+    <span class="sb-item" id="sb-build">✦ ready</span>
+  </div>
+  <div class="sb-right">
+    <span class="sb-item" id="sb-pos">Ln 1, Col 1</span>
+    <span class="sb-item">Spaces: 2</span>
+    <span class="sb-item">UTF-8</span>
+    <span class="sb-item" id="sb-lang">Imagine</span>
+    <span class="sb-item" id="sb-entry" title="Entry file — the program the compiler starts from. Click to change">▶ entry: —</span>
+    <span class="sb-item" id="sb-format" title="Output format — click to change">&lt;/&gt; HTML</span>
+    <span class="sb-item" id="sb-model" title="Compiler model — click to change">✦ Sonnet 5 · medium</span>
+  </div>
+</footer>
+
+<!-- ═══════════════ OVERLAYS ═══════════════ -->
+<div id="palette" class="hidden">
+  <div class="palette-box">
+    <input id="palette-input" type="text" placeholder="Type a command… ( > for commands, or a file name )" spellcheck="false">
+    <div id="palette-list"></div>
+  </div>
+</div>
+
+<div id="ctx-menu" class="hidden"></div>
+<div id="menu-dropdown" class="hidden"></div>
+<div id="toasts"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs/loader.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
