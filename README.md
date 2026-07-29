@@ -2,17 +2,10 @@
 
 **The IDE for programming languages that don't exist yet.**
 
-You invent a programming language — any syntax, any file extension, any rules you can dream up.
-<<<<<<< HEAD
-When you press **▶ Run**, Claude Code reads your imagination like a compiler reads source code and
-builds a **real, working website** from it, served live in the built-in preview.
-=======
-When you press **▶ Run**, a language model reads your imagination like a compiler reads source code
-and builds a **real, working website** from it, served live in the built-in preview.
+Invent a language — any syntax, any file extension. Press **▶ Run** and a model compiles your
+imagination into a **real, working website**, live in the built-in preview.
 
-Bring **Claude Code** (the login you already have) or your own **Anthropic**, **OpenAI** or
-**DeepSeek** API key — whichever you pick does the compiling.
->>>>>>> df90e14 (Changes)
+![ImagineCode — a VS Code-style IDE compiling an invented language into a real website](social-preview.png)
 
 > *"there are no syntax errors in imagination." — the compiler*
 
