@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ImagineCode — application mark, small-size variant (16–32px).
+  The viewfinder frame, the satellite spark and the rim highlight all turn to
+  mush below ~40px, so they are gone here and the spark grows to fill the tile.
+  What survives at 16px: a bright phosphor spark on an ink square.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="tile" x1="0.12" y1="0" x2="0.62" y2="1">
+      <stop offset="0"    stop-color="#1b1b24"/>
+      <stop offset="0.45" stop-color="#0d0d12"/>
+      <stop offset="1"    stop-color="#07070a"/>
+    </linearGradient>
+    <radialGradient id="bloom" cx="0.5" cy="0.5" r="0.55">
+      <stop offset="0"   stop-color="#c6f24e" stop-opacity="0.40"/>
+      <stop offset="0.4" stop-color="#c6f24e" stop-opacity="0.14"/>
+      <stop offset="1"   stop-color="#c6f24e" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="spark" x1="0.24" y1="0" x2="0.78" y2="1">
+      <stop offset="0"    stop-color="#f4ffd6"/>
+      <stop offset="0.42" stop-color="#d9ff6b"/>
+      <stop offset="1"    stop-color="#a9df26"/>
+    </linearGradient>
+    <filter id="softGlow" x="-70%" y="-70%" width="240%" height="240%">
+      <feGaussianBlur stdDeviation="30"/>
+    </filter>
+    <clipPath id="tileClip">
+      <rect x="0" y="0" width="1024" height="1024" rx="200" ry="200"/>
+    </clipPath>
+  </defs>
+
+  <rect x="0" y="0" width="1024" height="1024" rx="200" ry="200" fill="url(#tile)"/>
+  <g clip-path="url(#tileClip)">
+    <rect x="0" y="0" width="1024" height="1024" fill="url(#bloom)"/>
+    <path d="M 512 164 Q 550.4 459.8 768 512 Q 550.4 564.2 512 860
+             Q 473.6 564.2 256 512 Q 473.6 459.8 512 164 Z"
+          fill="#c6f24e" fill-opacity="0.6" filter="url(#softGlow)"/>
+    <path d="M 512 164 Q 550.4 459.8 768 512 Q 550.4 564.2 512 860
+             Q 473.6 564.2 256 512 Q 473.6 459.8 512 164 Z"
+          fill="url(#spark)"/>
+  </g>
+</svg>

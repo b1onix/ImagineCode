@@ -5,10 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ImagineCode — workspace</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23b180f0'/%3E%3Cstop offset='.5' stop-color='%23f08bd4'/%3E%3Cstop offset='1' stop-color='%236ea8fe'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath fill='url(%23g)' d='M12 1l2.4 6.6L21 10l-6.6 2.4L12 19l-2.4-6.6L3 10l6.6-2.4z'/%3E%3Ccircle fill='url(%23g)' cx='19' cy='19' r='2.4'/%3E%3C/svg%3E">
+<<<<<<< HEAD
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Schibsted+Grotesk:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Fragment+Mono:ital@0;1&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+=======
+<!-- non-blocking: the desktop app must still open on a machine with no internet -->
+<link rel="stylesheet" media="print" onload="this.media='all'"
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Schibsted+Grotesk:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Fragment+Mono:ital@0;1&display=swap">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="onboarding.css">
+>>>>>>> df90e14 (Changes)
 </head>
 <body>
 <div id="noise" aria-hidden="true"></div>
@@ -26,8 +34,26 @@
     </nav>
   </div>
   <div class="tb-center" id="tb-title">workspace — ImagineCode</div>
+<<<<<<< HEAD
   <div class="tb-right" aria-hidden="true">
     <span class="tb-hint">imagination&nbsp;→&nbsp;software</span>
+=======
+  <div class="tb-right">
+    <span class="tb-hint" aria-hidden="true">imagination&nbsp;→&nbsp;software</span>
+    <!-- desktop only: shown by app.js when running inside the Electron shell -->
+    <div id="winctl" class="hidden">
+      <button class="wc" data-wc="min" title="Minimize" aria-label="Minimize">
+        <svg viewBox="0 0 12 12"><path d="M1.5 6h9"/></svg>
+      </button>
+      <button class="wc" data-wc="max" title="Maximize" aria-label="Maximize">
+        <svg viewBox="0 0 12 12" class="wc-max"><rect x="1.8" y="1.8" width="8.4" height="8.4" rx="1"/></svg>
+        <svg viewBox="0 0 12 12" class="wc-restore"><rect x="1.5" y="3.4" width="7.1" height="7.1" rx="1"/><path d="M3.9 3.2V2.2a1 1 0 0 1 1-1h4.9a1 1 0 0 1 1 1v4.9a1 1 0 0 1-1 1h-1"/></svg>
+      </button>
+      <button class="wc close" data-wc="close" title="Close" aria-label="Close">
+        <svg viewBox="0 0 12 12"><path d="m2.2 2.2 7.6 7.6M9.8 2.2 2.2 9.8"/></svg>
+      </button>
+    </div>
+>>>>>>> df90e14 (Changes)
   </div>
 </header>
 
@@ -39,10 +65,18 @@
     <div class="ab-top">
       <button class="ab-item active" data-view="explorer" title="Explorer (Ctrl+Shift+E)"></button>
       <button class="ab-item" data-view="search" title="Search"></button>
+<<<<<<< HEAD
       <button class="ab-item" data-view="run-view" title="Run Imagination (Ctrl+Enter)"></button>
     </div>
     <div class="ab-bottom">
       <button class="ab-item" id="ab-claude" title="Claude Code connection"></button>
+=======
+      <button class="ab-item" id="ab-rules" title="Language Rules — teach the compiler your syntax (Ctrl+Shift+L)"></button>
+      <button class="ab-item" data-view="run-view" title="Run Imagination (Ctrl+Enter)"></button>
+    </div>
+    <div class="ab-bottom">
+      <button class="ab-item" id="ab-claude" title="Compiler connection — click to verify"></button>
+>>>>>>> df90e14 (Changes)
       <button class="ab-item" id="ab-settings" title="Settings"></button>
     </div>
   </aside>
@@ -105,26 +139,145 @@
               <h1><span class="w-imagine">Imagine</span><span class="w-code">Code</span></h1>
               <p class="w-tag">The IDE for programming languages that don't exist yet.</p>
             </div>
+<<<<<<< HEAD
+=======
+
+            <!-- the one thing that most improves what the compiler gives back -->
+            <button class="w-rules-band" id="w-rules-band">
+              <span class="wrb-mark">§</span>
+              <span class="wrb-body">
+                <span class="wrb-title">Recommended — teach the compiler your syntax</span>
+                <span class="wrb-sub" id="w-rules-sub">Write down what your invented constructs mean and the compiler stops guessing. It's the single biggest jump in how accurately your language compiles.</span>
+              </span>
+              <span class="wrb-go">Open Language Rules →</span>
+            </button>
+
+>>>>>>> df90e14 (Changes)
             <div class="welcome-cols">
               <div class="w-col">
                 <h2>Start</h2>
                 <button class="w-link" id="w-connect"><span class="wl-ico">⚡</span> Connect Claude Code</button>
+<<<<<<< HEAD
                 <button class="w-link" id="w-new"><span class="wl-ico">✦</span> New imagination file…</button>
                 <button class="w-link" id="w-run"><span class="wl-ico">▶</span> Run the example</button>
+=======
+                <button class="w-link" id="w-keys"><span class="wl-ico">🔑</span> Use your own API key instead…</button>
+                <button class="w-link" id="w-rules"><span class="wl-ico">§</span> Set your language rules…</button>
+                <button class="w-link" id="w-new"><span class="wl-ico">✦</span> New imagination file…</button>
+                <button class="w-link" id="w-run"><span class="wl-ico">▶</span> Run the example</button>
+                <button class="w-link" id="w-intro"><span class="wl-ico">✦</span> Replay the introduction</button>
+>>>>>>> df90e14 (Changes)
                 <h2 style="margin-top:26px">Recent</h2>
                 <div id="w-recent"></div>
               </div>
               <div class="w-col">
                 <h2>How it works</h2>
                 <div class="w-step"><span class="w-step-n">1</span><div><strong>Invent a language.</strong><br>Write code the way you imagine code should look. Any syntax. Any file extension. There are no rules and no errors.</div></div>
+<<<<<<< HEAD
                 <div class="w-step"><span class="w-step-n">2</span><div><strong>Press Run.</strong><br>Claude Code reads your imagination like a compiler reads source — and builds a real website from it.</div></div>
                 <div class="w-step"><span class="w-step-n">3</span><div><strong>Watch it exist.</strong><br>A live preview opens right here in the IDE. Change your language, run again, dream bigger.</div></div>
+=======
+                <div class="w-step"><span class="w-step-n">2</span><div><strong>Write down its rules.</strong><br>Tell the compiler what your symbols and blocks mean — in <em>Language Rules</em>. It then follows your definitions instead of guessing at them.</div></div>
+                <div class="w-step"><span class="w-step-n">3</span><div><strong>Press Run.</strong><br>Claude Code reads your imagination like a compiler reads source — and builds a real website from it.</div></div>
+                <div class="w-step"><span class="w-step-n">4</span><div><strong>Watch it exist.</strong><br>A live preview opens right here in the IDE. Change your language, run again, dream bigger.</div></div>
+>>>>>>> df90e14 (Changes)
                 <div class="w-quote">“there are no syntax errors in imagination.”<span> — the compiler</span></div>
               </div>
             </div>
           </div>
         </div>
 
+<<<<<<< HEAD
+=======
+        <!-- LANGUAGE RULES -->
+        <div id="rules-page" class="stack-page">
+          <div class="rules-inner">
+            <div class="rules-head">
+              <div>
+                <h1>Language Rules</h1>
+                <p class="settings-sub">Your language, defined by you. The compiler reads this <em>before</em> your source — so where you say what something means, it stops guessing and follows you.</p>
+              </div>
+              <label class="rules-master" title="Turn the whole spec off without deleting it">
+                <input type="checkbox" id="rules-enabled">
+                <span class="rm-track"><span class="rm-knob"></span></span>
+                <span class="rm-label">Send to compiler</span>
+              </label>
+            </div>
+
+            <div class="rules-cols">
+              <div class="rules-main">
+                <div class="set-group">
+                  <h2>Language Name</h2>
+                  <p class="set-desc">What you call the language you invented. Optional — but it makes the spec read like a spec.</p>
+                  <input type="text" id="rules-name" class="rules-input" spellcheck="false" placeholder="e.g. Dreamscript, beanlang, Synthwave">
+                </div>
+
+                <div class="set-group">
+                  <h2>How Your Language Works</h2>
+                  <p class="set-desc">A few sentences on the shape of it: what indentation does, how structure is expressed, what kind of thing a program describes. Write it as if explaining it to someone who has to implement it.</p>
+                  <textarea id="rules-overview" class="rules-input" rows="6" spellcheck="false" placeholder="e.g. Indentation is nesting — anything indented under a line belongs to it. Quoted text is literal copy for the screen. A line ending in a colon opens a section. Everything else is a sentence describing one element."></textarea>
+                  <div class="rules-count" id="rules-overview-count"></div>
+                </div>
+
+                <div class="set-group">
+                  <h2>Syntax Glossary</h2>
+                  <p class="set-desc">The heart of it. Each row binds one construct to one meaning — the compiler treats these as law, above its own reading of what the symbol looks like it should mean.</p>
+                  <div class="glossary-head">
+                    <span class="gh-syntax">when the source says…</span>
+                    <span class="gh-arrow"></span>
+                    <span class="gh-means">…the compiler must do this</span>
+                    <span class="gh-actions"></span>
+                  </div>
+                  <div id="rules-list" class="glossary"></div>
+                  <div class="glossary-actions">
+                    <button class="prov-btn ghost" id="rules-add">+ Add a rule</button>
+                    <span class="rules-count" id="rules-count"></span>
+                  </div>
+                </div>
+
+                <div class="set-group">
+                  <h2>Worked Examples</h2>
+                  <p class="set-desc">Optional, and unreasonably effective: a snippet of your language plus what it must compile to. The compiler treats each one as a test case it has to match.</p>
+                  <div id="examples-list" class="examples"></div>
+                  <div class="glossary-actions">
+                    <button class="prov-btn ghost" id="examples-add">+ Add an example</button>
+                  </div>
+                </div>
+              </div>
+
+              <aside class="rules-side">
+                <div class="rules-card">
+                  <h3>Start from a shape</h3>
+                  <p>Templates for the three languages people invent most. They fill the fields — nothing is sent anywhere.</p>
+                  <div id="rules-templates" class="tpl-list"></div>
+                </div>
+
+                <div class="rules-card">
+                  <h3>Read my language for me</h3>
+                  <p>Let the compiler read your workspace and <em>propose</em> a glossary. You review every line before anything is saved.</p>
+                  <button class="prov-btn" id="rules-infer">✦ Propose rules from my files</button>
+                  <div id="rules-infer-state" class="rules-infer-state"></div>
+                </div>
+
+                <div class="rules-card">
+                  <h3>What the compiler reads</h3>
+                  <p>The exact text prepended to every build, rendered by the same code that builds the prompt.</p>
+                  <pre id="rules-preview" class="rules-preview"></pre>
+                  <div class="rules-preview-foot" id="rules-preview-foot"></div>
+                </div>
+              </aside>
+            </div>
+
+            <div class="rules-bar">
+              <span class="rules-status" id="rules-status"></span>
+              <span class="rules-spacer"></span>
+              <button class="prov-btn ghost" id="rules-revert">Revert</button>
+              <button class="prov-btn" id="rules-save">Save rules</button>
+            </div>
+          </div>
+        </div>
+
+>>>>>>> df90e14 (Changes)
         <!-- SETTINGS -->
         <div id="settings-page" class="stack-page">
           <div class="settings-inner">
@@ -153,14 +306,43 @@
             </div>
 
             <div class="set-group">
+<<<<<<< HEAD
               <h2>Compiler Model</h2>
               <p class="set-desc">Which Claude does the imagining-to-existence work.</p>
+=======
+              <h2>Compiler Provider</h2>
+              <p class="set-desc">Who does the imagining-to-existence work. Claude Code uses the login you already have; the others use an API key of your own, stored on this machine only.</p>
+              <div id="provider-list" class="provider-list"></div>
+            </div>
+
+            <div class="set-group">
+              <h2>Compiler Model</h2>
+              <p class="set-desc" id="model-desc">Which model does the imagining-to-existence work.</p>
+>>>>>>> df90e14 (Changes)
               <div id="model-list" class="model-list"></div>
             </div>
 
             <div class="set-group">
+<<<<<<< HEAD
               <h2>Standing Build Notes</h2>
               <p class="set-desc">Whispered to the compiler on every build — style preferences, vibes, rules of your universe.</p>
+=======
+              <h2>Language Rules</h2>
+              <p class="set-desc">What your invented syntax <em>means</em>. Kept on its own page because it's the setting that changes the output most — the compiler follows your definitions instead of guessing at them.</p>
+              <button class="rules-jump" id="set-rules-jump">
+                <span class="rj-mark">§</span>
+                <span class="rj-body">
+                  <span class="rj-title" id="set-rules-title">No language rules yet</span>
+                  <span class="rj-sub" id="set-rules-sub">Recommended — define your syntax once and every build gets it right.</span>
+                </span>
+                <span class="rj-go">Open →</span>
+              </button>
+            </div>
+
+            <div class="set-group">
+              <h2>Standing Build Notes</h2>
+              <p class="set-desc">Whispered to the compiler on every build — style preferences, vibes, rules of your universe. For what your <em>syntax</em> means, use Language Rules above.</p>
+>>>>>>> df90e14 (Changes)
               <textarea id="set-notes" rows="4" spellcheck="false" placeholder="e.g. always dark mode. everything slightly magical. never use the color beige."></textarea>
             </div>
           </div>
@@ -226,8 +408,15 @@
     <span class="sb-item">UTF-8</span>
     <span class="sb-item" id="sb-lang">Imagine</span>
     <span class="sb-item" id="sb-entry" title="Entry file — the program the compiler starts from. Click to change">▶ entry: —</span>
+<<<<<<< HEAD
     <span class="sb-item" id="sb-format" title="Output format — click to change">&lt;/&gt; HTML</span>
     <span class="sb-item" id="sb-model" title="Compiler model — click to change">✦ Sonnet 5 · medium</span>
+=======
+    <span class="sb-item" id="sb-rules" title="Language rules — what your syntax means. Click to edit">§ rules: —</span>
+    <span class="sb-item" id="sb-format" title="Output format — click to change">&lt;/&gt; HTML</span>
+    <span class="sb-item" id="sb-model" title="Compiler model — click to change">✦ Sonnet 5 · medium</span>
+    <span class="sb-item" id="sb-provider" title="Compiler provider — click to change">⚡ Claude Code</span>
+>>>>>>> df90e14 (Changes)
   </div>
 </footer>
 
@@ -243,7 +432,12 @@
 <div id="menu-dropdown" class="hidden"></div>
 <div id="toasts"></div>
 
+<<<<<<< HEAD
 <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs/loader.js"></script>
+=======
+<script src="/env.js"></script>
+<script src="onboarding.js"></script>
+>>>>>>> df90e14 (Changes)
 <script src="app.js"></script>
 </body>
 </html>

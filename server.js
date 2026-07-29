@@ -8,6 +8,7 @@ import { spawn } from 'child_process';
 import { query } from '@anthropic-ai/claude-agent-sdk';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+<<<<<<< HEAD
 const WORKSPACE = path.join(__dirname, 'workspace');
 const OUTPUT = path.join(__dirname, 'output');
 const PUBLIC = path.join(__dirname, 'public');
@@ -16,10 +17,59 @@ const MODELS = {
   'claude-sonnet-5':  { label: 'Sonnet 5',  effortDefault: 'medium', supportsEffort: true },
   'claude-opus-4-8':  { label: 'Opus 4.8',  effortDefault: 'low',    supportsEffort: true },
   'claude-haiku-4-5': { label: 'Haiku 4.5', effortDefault: null,     supportsEffort: false },
+=======
+
+// ---------------------------------------------------------------- locations
+//
+// Run from a checkout, everything lives next to this file. Run from the
+// packaged desktop app, this file is read-only inside app.asar — so anything
+// the dreamer creates or the compiler writes moves to a writable data
+// directory that the Electron shell hands us.
+
+const DATA_DIR = process.env.IMAGINECODE_DATA_DIR || __dirname;
+const WORKSPACE = path.join(DATA_DIR, 'workspace');
+const OUTPUT = path.join(DATA_DIR, 'output');
+const PUBLIC = path.join(__dirname, 'public');
+// example imaginations copied in the first time the workspace is empty
+const SEED = process.env.IMAGINECODE_SEED_DIR || path.join(__dirname, 'resources', 'seed-workspace');
+// Monaco, vendored so the desktop app still has an editor with no internet
+const MONACO_LOCAL = path.join(__dirname, 'node_modules', 'monaco-editor', 'min', 'vs');
+const MONACO_CDN = 'https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs';
+const hasLocalMonaco = existsSync(path.join(MONACO_LOCAL, 'loader.js'));
+const MONACO_VERSION = (() => {
+  try { return JSON.parse(readFileSync(path.join(__dirname, 'node_modules', 'monaco-editor', 'package.json'), 'utf8')).version; }
+  catch { return '0'; }
+})();
+const MONACO_BASE = `/vs-${MONACO_VERSION}`;
+
+// The SDK finds its native CLI with require.resolve, which cannot reach inside
+// app.asar — the desktop shell resolves the unpacked binary and passes it here.
+const CLAUDE_BIN = process.env.IMAGINECODE_CLAUDE_BIN && existsSync(process.env.IMAGINECODE_CLAUDE_BIN)
+  ? process.env.IMAGINECODE_CLAUDE_BIN
+  : null;
+const claudeExec = () => (CLAUDE_BIN ? { pathToClaudeCodeExecutable: CLAUDE_BIN } : {});
+
+// ---------------------------------------------------------------- providers
+//
+// ImagineCode can compile through four different back ends. `claude-code` is
+// the agentic one (the Claude Agent SDK drives Write/Edit/Read inside output/);
+// the other three are the user's own API keys, talked to over plain HTTPS and
+// asked to return the finished index.html in one streamed pass.
+//
+// Every curated catalog below is a *floor*, not a ceiling: whenever a key is
+// present the provider's own GET /v1/models is merged on top (see liveModels),
+// so models released after this file was written still show up in the picker.
+
+const MODELS = {
+  'claude-sonnet-5':  { label: 'Sonnet 5',  badge: 'default · medium reasoning', desc: 'balanced + quick — the imagination workhorse', effortDefault: 'medium', supportsEffort: true },
+  'claude-opus-4-8':  { label: 'Opus 4.8',  badge: 'low reasoning',              desc: 'deepest interpretation, for intricate dreams',  effortDefault: 'low',    supportsEffort: true },
+  'claude-haiku-4-5': { label: 'Haiku 4.5', badge: 'fast',                       desc: 'instant sketches, lightest touch',              effortDefault: null,     supportsEffort: false },
+>>>>>>> df90e14 (Changes)
 };
 const DEFAULT_MODEL = 'claude-sonnet-5';
 const HANDSHAKE_MODEL = 'claude-haiku-4-5';
 
+<<<<<<< HEAD
 const app = express();
 app.use(express.json({ limit: '5mb' }));
 
@@ -28,13 +78,154 @@ const state = {
   render: null, // { controller, res, startedAt }
   lastBuild: null, // { at, format, model, seconds, costUsd }
 };
+=======
+const ANTHROPIC_VERSION = '2023-06-01';
+
+// thinking: 'adaptive' → send thinking:{type:'adaptive'} (Claude 4.6+ only).
+// price: USD per 1M tokens, used to estimate build cost.
+const ANTHROPIC_MODELS = {
+  'claude-opus-5':    { label: 'Opus 5',    badge: 'most capable', desc: 'the deepest reader of invented syntax', thinking: 'adaptive', supportsEffort: true, effortDefault: 'medium', price: { in: 5,  out: 25 } },
+  'claude-sonnet-5':  { label: 'Sonnet 5',  badge: 'recommended',  desc: 'balanced + quick — the imagination workhorse', thinking: 'adaptive', supportsEffort: true, effortDefault: 'medium', price: { in: 3,  out: 15 } },
+  'claude-fable-5':   { label: 'Fable 5',   badge: 'most creative', desc: 'wilder interpretations, premium price', thinking: 'adaptive', supportsEffort: true, effortDefault: 'medium', price: { in: 10, out: 50 } },
+  'claude-opus-4-8':  { label: 'Opus 4.8',  badge: '',             desc: 'previous flagship, still formidable', thinking: 'adaptive', supportsEffort: true, effortDefault: 'low', price: { in: 5, out: 25 } },
+  'claude-opus-4-6':  { label: 'Opus 4.6',  badge: '',             desc: 'older opus generation', thinking: 'adaptive', supportsEffort: true, effortDefault: 'low', price: { in: 5, out: 25 } },
+  'claude-sonnet-4-6':{ label: 'Sonnet 4.6', badge: '',            desc: 'older sonnet generation', thinking: 'adaptive', supportsEffort: true, effortDefault: 'medium', price: { in: 3, out: 15 } },
+  'claude-haiku-4-5': { label: 'Haiku 4.5', badge: 'fast + cheap', desc: 'instant sketches, lightest touch', thinking: null, supportsEffort: false, effortDefault: null, price: { in: 1, out: 5 } },
+};
+
+const OPENAI_MODELS = {
+  'gpt-5.6-terra': { label: 'GPT-5.6 Terra', badge: 'recommended',   desc: 'balances intelligence and cost', supportsEffort: true, effortDefault: 'medium' },
+  'gpt-5.6-sol':   { label: 'GPT-5.6 Sol',   badge: 'most capable',  desc: 'frontier model for complex work', supportsEffort: true, effortDefault: 'medium' },
+  'gpt-5.6-luna':  { label: 'GPT-5.6 Luna',  badge: 'fast + cheap',  desc: 'tuned for cost-sensitive builds', supportsEffort: true, effortDefault: 'low' },
+};
+
+const DEEPSEEK_MODELS = {
+  'deepseek-v4-pro':   { label: 'DeepSeek V4 Pro',   badge: 'recommended',  desc: 'thinking on by default, 1M context', price: { in: 0.435, out: 0.87 } },
+  'deepseek-v4-flash': { label: 'DeepSeek V4 Flash', badge: 'fast + cheap', desc: 'the bargain dreamer', price: { in: 0.14, out: 0.28 } },
+};
+
+const PROVIDERS = {
+  'claude-code': {
+    label: 'Claude Code',
+    kind: 'agent',
+    blurb: 'Your existing Claude Code login or ~/.claude settings. Agentic — it reads and edits the build directly, so incremental rebuilds are surgical.',
+    needsKey: false,
+    models: MODELS,
+    defaultModel: DEFAULT_MODEL,
+  },
+  anthropic: {
+    label: 'Anthropic API',
+    kind: 'anthropic',
+    blurb: 'Your own Anthropic API key. Claude writes the whole page in one streamed pass.',
+    needsKey: true,
+    keyHint: 'sk-ant-…',
+    keyUrl: 'https://console.anthropic.com/settings/keys',
+    envVar: 'ANTHROPIC_API_KEY',
+    base: 'https://api.anthropic.com/v1',
+    maxOut: 32000,
+    models: ANTHROPIC_MODELS,
+    defaultModel: 'claude-sonnet-5',
+  },
+  openai: {
+    label: 'OpenAI API',
+    kind: 'openai',
+    blurb: 'Your own OpenAI API key, over the Chat Completions API.',
+    needsKey: true,
+    keyHint: 'sk-…',
+    keyUrl: 'https://platform.openai.com/api-keys',
+    envVar: 'OPENAI_API_KEY',
+    base: 'https://api.openai.com/v1',
+    maxTokensField: 'max_completion_tokens',
+    maxOut: 64000,
+    models: OPENAI_MODELS,
+    defaultModel: 'gpt-5.6-terra',
+  },
+  deepseek: {
+    label: 'DeepSeek API',
+    kind: 'openai',
+    blurb: 'Your own DeepSeek API key, over its OpenAI-compatible endpoint.',
+    needsKey: true,
+    keyHint: 'sk-…',
+    keyUrl: 'https://platform.deepseek.com/api_keys',
+    envVar: 'DEEPSEEK_API_KEY',
+    base: 'https://api.deepseek.com/v1',
+    maxTokensField: 'max_tokens',
+    maxOut: 64000,
+    models: DEEPSEEK_MODELS,
+    defaultModel: 'deepseek-v4-pro',
+  },
+};
+const DEFAULT_PROVIDER = 'claude-code';
+
+// The desktop shell forks this file over an IPC channel. If the shell is
+// force-killed the channel closes, and without this the server would outlive
+// it — an immortal process squatting on port 3333, invisible in the taskbar,
+// blocking the next launch.
+if (process.send) {
+  process.on('disconnect', () => process.exit(0));
+}
+
+const app = express();
+app.use(express.json({ limit: '5mb' }));
+
+// ---------------------------------------------------------------- local-only guard
+//
+// This is an unauthenticated API on a predictable localhost port, and the
+// desktop app leaves it listening all day. Without these two checks any web
+// page the user happens to have open could read and rewrite their workspace,
+// or kick off real, billable builds, entirely in the background.
+
+const LOCAL_HOST = /^(localhost|127\.0\.0\.1|\[::1\]|::1)(:\d+)?$/i;
+
+app.use((req, res, next) => {
+  // DNS rebinding: an attacker's domain resolving to 127.0.0.1 arrives with
+  // their Host, not ours
+  const host = req.headers.host || '';
+  if (host && !LOCAL_HOST.test(host)) {
+    return res.status(403).json({ error: 'ImagineCode only answers to localhost.' });
+  }
+  // CSRF: browsers attach Origin to every cross-site state-changing request.
+  // A missing Origin means a non-browser client (curl, a script), which cannot
+  // be used to attack the user's own session.
+  if (req.method !== 'GET' && req.method !== 'HEAD') {
+    const origin = req.headers.origin;
+    if (origin) {
+      let ok = false;
+      try { ok = LOCAL_HOST.test(new URL(origin).host); } catch {}
+      if (!ok) return res.status(403).json({ error: 'Cross-origin requests are not accepted.' });
+    }
+  }
+  next();
+});
+
+const state = {
+  // per-provider connection records; 'claude-code' is also mirrored onto
+  // /api/status's top level so nothing that predates providers breaks
+  connections: { 'claude-code': { connected: false, checkedAt: null, version: null, method: null, error: null } },
+  render: null, // { controller, res, startedAt }
+  lastBuild: null, // { at, format, model, provider, seconds, costUsd }
+};
+const conn = (id) => (state.connections[id] ??= { connected: false, checkedAt: null, error: null });
+>>>>>>> df90e14 (Changes)
 
 // ---------------------------------------------------------------- helpers
 
 function safeJoin(root, rel) {
   const clean = String(rel || '').replace(/\\/g, '/').replace(/^\/+/, '');
   const abs = path.resolve(root, clean);
+<<<<<<< HEAD
   if (abs !== root && !abs.startsWith(root + path.sep)) {
+=======
+  // The root itself is never a legitimate target — every caller wants a file or
+  // a folder *inside* the workspace. Letting it through would make
+  // `DELETE /api/file?path=` a recursive delete of everything the dreamer owns.
+  if (abs === root) {
+    const err = new Error('That path is the workspace itself');
+    err.status = 400;
+    throw err;
+  }
+  if (!abs.startsWith(root + path.sep)) {
+>>>>>>> df90e14 (Changes)
     const err = new Error('Path escapes workspace');
     err.status = 400;
     throw err;
@@ -85,7 +276,14 @@ function claudeVersion() {
     let done = false;
     const finish = (v) => { if (!done) { done = true; resolve(v); } };
     try {
+<<<<<<< HEAD
       const p = spawn('claude', ['--version'], { shell: true, windowsHide: true });
+=======
+      // the bundled binary when packaged, whatever is on PATH otherwise
+      const p = CLAUDE_BIN
+        ? spawn(CLAUDE_BIN, ['--version'], { windowsHide: true })
+        : spawn('claude', ['--version'], { shell: true, windowsHide: true });
+>>>>>>> df90e14 (Changes)
       let buf = '';
       p.stdout.on('data', (d) => (buf += d));
       p.on('close', () => finish(buf.trim() || null));
@@ -133,12 +331,354 @@ function sdkEnv() {
   const env = {};
   for (const [k, v] of Object.entries(process.env)) {
     if (nested && /^(CLAUDECODE$|CLAUDE_CODE_|CLAUDE_AGENT_|CLAUDE_PID$|CLAUDE_EFFORT$|AI_AGENT$|BAGGAGE$|ANTHROPIC_BASE_URL$|ANTHROPIC_DEFAULT_)/.test(k)) continue;
+<<<<<<< HEAD
+=======
+    // in the desktop build this process is Electron wearing a Node costume;
+    // the costume must not be handed down to the compiler's own child process
+    if (/^(ELECTRON_RUN_AS_NODE$|ELECTRON_|NODE_OPTIONS$)/.test(k)) continue;
+>>>>>>> df90e14 (Changes)
     env[k] = v;
   }
   Object.assign(env, userSettingsEnv());
   return env;
 }
 
+<<<<<<< HEAD
+=======
+// ---------------------------------------------------------------- api keys
+//
+// Keys live in a gitignored file next to server.js, never in the browser.
+// They are only ever sent OUT masked — the full value leaves this process
+// exclusively in an Authorization / x-api-key header to the provider itself.
+
+const KEYS_FILE = path.join(DATA_DIR, '.imaginecode-keys.json');
+let keyCache = null;
+
+function readKeys() {
+  if (keyCache) return keyCache;
+  try { keyCache = JSON.parse(readFileSync(KEYS_FILE, 'utf8')); } catch { keyCache = {}; }
+  return keyCache;
+}
+async function writeKeys(next) {
+  keyCache = next;
+  await fs.writeFile(KEYS_FILE, JSON.stringify(next, null, 2), { mode: 0o600 });
+}
+// stored key wins; an env var is a convenient fallback for CI / dotfiles
+function providerKey(id) {
+  const stored = readKeys()[id];
+  if (stored) return { key: stored, source: 'saved' };
+  const envVar = PROVIDERS[id]?.envVar;
+  if (envVar && process.env[envVar]) return { key: process.env[envVar], source: envVar };
+  return { key: null, source: null };
+}
+function maskKey(k) {
+  if (!k) return null;
+  return k.length <= 12 ? `${k.slice(0, 3)}…${k.slice(-2)}` : `${k.slice(0, 7)}…${k.slice(-4)}`;
+}
+
+// ---------------------------------------------------------------- direct provider transport
+
+function apiError(status, text, label) {
+  let msg = String(text || '').slice(0, 400);
+  try {
+    const j = JSON.parse(text);
+    msg = j.error?.message || j.error?.type || j.message || msg;
+  } catch {}
+  const hint = status === 401 ? ' — the API key was rejected'
+    : status === 403 ? ' — this key is not allowed to use that model'
+    : status === 404 ? ' — that model is not available on this key'
+    : status === 429 ? ' — rate limited, try again in a moment'
+    : status >= 500 ? ' — the provider is having a moment' : '';
+  const err = new Error(`${label} ${status}${hint} · ${String(msg).slice(0, 300)}`);
+  err.status = status;
+  return err;
+}
+
+// yields the payload of every `data:` line in an SSE response
+async function* sseData(res) {
+  const reader = res.body.getReader();
+  const dec = new TextDecoder();
+  let buf = '';
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buf += dec.decode(value, { stream: true });
+    let i;
+    while ((i = buf.indexOf('\n')) >= 0) {
+      const line = buf.slice(0, i).replace(/\r$/, '');
+      buf = buf.slice(i + 1);
+      if (line.startsWith('data:')) yield line.slice(5).trim();
+    }
+  }
+  if (buf.startsWith('data:')) yield buf.slice(5).trim();
+}
+
+// Optional request fields (thinking, effort, token caps) differ per model and
+// drift over time. Rather than maintain a compatibility matrix, we send the
+// rich body first and, on a 400 that names one of those fields, retry once
+// with the plainest body the API accepts.
+async function postStream(url, headers, rich, plain, signal, label) {
+  const send = (body) => fetch(url, { method: 'POST', headers, body: JSON.stringify(body), signal });
+  let res = await send(rich);
+  if (res.status === 400 && plain) {
+    const text = await res.text().catch(() => '');
+    if (!/thinking|effort|output_config|max_tokens|max_completion_tokens|stream_options|reasoning|temperature|unsupported|unrecognized|not supported/i.test(text)) {
+      throw apiError(400, text, label);
+    }
+    res = await send(plain);
+  }
+  if (!res.ok) throw apiError(res.status, await res.text().catch(() => ''), label);
+  return res;
+}
+
+async function anthropicStream({ base, apiKey, model, system, prompt, maxTokens, thinking, effort, signal, onText, onThink, onUsage }) {
+  const headers = { 'x-api-key': apiKey, 'anthropic-version': ANTHROPIC_VERSION, 'content-type': 'application/json' };
+  const plain = { model, max_tokens: maxTokens, system, stream: true, messages: [{ role: 'user', content: prompt }] };
+  const rich = { ...plain };
+  if (thinking === 'adaptive') rich.thinking = { type: 'adaptive' };
+  if (effort) rich.output_config = { effort };
+  const res = await postStream(`${base}/messages`, headers, rich, plain, signal, 'Anthropic API');
+
+  let stopReason = null;
+  for await (const data of sseData(res)) {
+    if (!data || data === '[DONE]') continue;
+    let ev; try { ev = JSON.parse(data); } catch { continue; }
+    if (ev.type === 'content_block_delta') {
+      if (ev.delta?.type === 'text_delta' && ev.delta.text) onText(ev.delta.text);
+      else if (ev.delta?.type === 'thinking_delta' && ev.delta.thinking) onThink(ev.delta.thinking);
+    } else if (ev.type === 'message_start') {
+      onUsage({ in: ev.message?.usage?.input_tokens ?? 0 });
+    } else if (ev.type === 'message_delta') {
+      if (ev.usage?.output_tokens != null) onUsage({ out: ev.usage.output_tokens });
+      if (ev.delta?.stop_reason) stopReason = ev.delta.stop_reason;
+    } else if (ev.type === 'error') {
+      throw new Error(ev.error?.message || 'the Anthropic stream errored');
+    }
+  }
+  return { stopReason };
+}
+
+async function openaiStream({ base, apiKey, model, system, prompt, maxTokens, maxTokensField, effort, signal, label, onText, onThink, onUsage }) {
+  const headers = { Authorization: `Bearer ${apiKey}`, 'content-type': 'application/json' };
+  const messages = [{ role: 'system', content: system }, { role: 'user', content: prompt }];
+  const plain = { model, stream: true, messages };
+  const rich = { ...plain, stream_options: { include_usage: true } };
+  if (maxTokens) rich[maxTokensField || 'max_tokens'] = maxTokens;
+  if (effort) rich.reasoning_effort = effort;
+  const res = await postStream(`${base}/chat/completions`, headers, rich, plain, signal, label);
+
+  let stopReason = null;
+  for await (const data of sseData(res)) {
+    if (!data || data === '[DONE]') continue;
+    let ev; try { ev = JSON.parse(data); } catch { continue; }
+    const choice = ev.choices?.[0];
+    const d = choice?.delta;
+    if (d?.content) onText(d.content);
+    // DeepSeek (and several compatible servers) stream chain-of-thought here
+    if (d?.reasoning_content) onThink(d.reasoning_content);
+    if (choice?.finish_reason) stopReason = choice.finish_reason;
+    if (ev.usage) onUsage({ in: ev.usage.prompt_tokens ?? 0, out: ev.usage.completion_tokens ?? 0 });
+    if (ev.error) throw new Error(ev.error.message || 'the provider stream errored');
+  }
+  return { stopReason };
+}
+
+// ---------------------------------------------------------------- model discovery
+
+const liveCache = {}; // providerId -> { at, key, models }
+
+async function liveModels(id) {
+  const p = PROVIDERS[id];
+  const { key } = providerKey(id);
+  if (!p || p.kind === 'agent' || !key) return null;
+  const cached = liveCache[id];
+  if (cached && cached.key === key && Date.now() - cached.at < 300_000) return cached.models;
+
+  const headers = p.kind === 'anthropic'
+    ? { 'x-api-key': key, 'anthropic-version': ANTHROPIC_VERSION }
+    : { Authorization: `Bearer ${key}` };
+  const url = p.kind === 'anthropic' ? `${p.base}/models?limit=1000` : `${p.base}/models`;
+  const res = await fetch(url, { headers, signal: AbortSignal.timeout(20_000) });
+  if (!res.ok) throw apiError(res.status, await res.text().catch(() => ''), `${p.label} models`);
+  const json = await res.json();
+  const models = {};
+  for (const m of json.data || []) {
+    if (!m?.id) continue;
+    // the chat catalogs also carry image / audio / embedding endpoints
+    if (p.kind !== 'anthropic' && /embed|whisper|tts|dall-e|image|audio|realtime|moderation|transcribe|sora|clip|search/i.test(m.id)) continue;
+    models[m.id] = { label: m.display_name || m.id, live: true };
+  }
+  liveCache[id] = { at: Date.now(), key, models };
+  return models;
+}
+
+// curated entries first (they carry labels, blurbs and pricing), then anything
+// else the account can actually reach
+function mergeCatalog(id, live) {
+  const curated = PROVIDERS[id]?.models || {};
+  const out = {};
+  for (const [k, v] of Object.entries(curated)) out[k] = { ...v, available: !live || !!live[k] };
+  if (live) for (const [k, v] of Object.entries(live)) if (!out[k]) out[k] = { ...v, badge: 'on your account', desc: '', available: true };
+  return out;
+}
+
+async function providerPayload(id) {
+  const p = PROVIDERS[id];
+  const { key, source } = providerKey(id);
+  const payload = {
+    id, label: p.label, kind: p.kind, blurb: p.blurb, needsKey: !!p.needsKey,
+    keyHint: p.keyHint || null, keyUrl: p.keyUrl || null, envVar: p.envVar || null,
+    hasKey: !!key, keyMask: maskKey(key), keySource: source,
+    defaultModel: p.defaultModel, models: mergeCatalog(id, null),
+    connection: conn(id), modelsError: null,
+  };
+  if (p.kind !== 'agent' && key) {
+    try { payload.models = mergeCatalog(id, await liveModels(id)); }
+    catch (err) { payload.modelsError = String(err?.message || err).slice(0, 220); }
+  }
+  return payload;
+}
+
+// ---------------------------------------------------------------- language rules
+//
+// The dreamer's own reference manual for the language they invented: what it is
+// called, how it works in general, a syntax → meaning glossary, and worked
+// examples. Without it the compiler has to *guess* what `~>` or `bloom {}`
+// means from context; with it, it is told. This is the difference between an
+// interpreter of vibes and a compiler for a real (if imaginary) language.
+//
+// Kept deliberately separate from Standing Build Notes: notes are about taste
+// ("always dark mode"), rules are about MEANING, and meaning outranks taste.
+
+const RULES_FILE = path.join(DATA_DIR, '.imaginecode-rules.json');
+
+// Caps exist because every character here is prepended to every build. A
+// runaway paste should cost the dreamer a truncation notice, not a 400 from the
+// provider halfway through a build they already paid for.
+const RULES_LIMITS = {
+  name: 60,
+  overview: 4000,
+  syntax: 240,
+  means: 700,
+  exampleSource: 2400,
+  exampleMeans: 900,
+  rules: 200,
+  examples: 40,
+  total: 26_000,
+};
+
+const str = (v, max) => String(v ?? '').replace(/\r\n/g, '\n').trim().slice(0, max);
+
+let rulesCache = null;
+
+// Everything that reaches the prompt or the page goes through here, so a
+// hand-edited file, an older schema and a fresh install all produce the same
+// shape. Ids are positional rather than random: this module has no clock and no
+// randomness to lean on, and the front end only needs them to be stable within
+// one payload.
+function normalizeRules(raw) {
+  const r = raw && typeof raw === 'object' ? raw : {};
+  const list = (v) => (Array.isArray(v) ? v : []);
+  const rules = list(r.rules)
+    .map((x, i) => ({
+      id: `r${i + 1}`,
+      syntax: str(x?.syntax, RULES_LIMITS.syntax),
+      means: str(x?.means, RULES_LIMITS.means),
+      // absent means on: a rule pasted in by hand should count
+      on: x?.on !== false,
+    }))
+    .filter((x) => x.syntax || x.means)
+    .slice(0, RULES_LIMITS.rules);
+  const examples = list(r.examples)
+    .map((x, i) => ({
+      id: `e${i + 1}`,
+      source: str(x?.source, RULES_LIMITS.exampleSource),
+      means: str(x?.means, RULES_LIMITS.exampleMeans),
+      on: x?.on !== false,
+    }))
+    .filter((x) => x.source || x.means)
+    .slice(0, RULES_LIMITS.examples);
+  return {
+    enabled: r.enabled !== false,
+    name: str(r.name, RULES_LIMITS.name),
+    overview: str(r.overview, RULES_LIMITS.overview),
+    rules,
+    examples,
+    updatedAt: typeof r.updatedAt === 'string' ? r.updatedAt : null,
+  };
+}
+
+function readRules() {
+  if (rulesCache) return rulesCache;
+  let raw = null;
+  try { raw = JSON.parse(readFileSync(RULES_FILE, 'utf8')); } catch {}
+  rulesCache = normalizeRules(raw);
+  return rulesCache;
+}
+
+// Renders the spec exactly as the compiler will receive it. The UI shows the
+// output of this same function, so "what the compiler reads" is never a
+// well-meaning approximation of what it actually reads.
+function compileRules(rules) {
+  const r = normalizeRules(rules);
+  if (!r.enabled) return { text: '', ruleCount: 0, exampleCount: 0, chars: 0, truncated: false };
+  const on = r.rules.filter((x) => x.on && (x.syntax || x.means));
+  const ex = r.examples.filter((x) => x.on && (x.source || x.means));
+  if (!r.overview && !on.length && !ex.length) {
+    return { text: '', ruleCount: 0, exampleCount: 0, chars: 0, truncated: false };
+  }
+
+  const named = r.name || 'this language';
+  const parts = [
+    `════════ THE LANGUAGE SPEC — written by the dreamer who invented ${named} ════════`,
+    `This section is the AUTHORITATIVE definition of the language in the source files below. It was written by the person who invented it. Where it says what something means, that IS what it means — it outranks every general reading heuristic in your instructions, and it outranks any more natural-looking interpretation you would otherwise have reached. Read all of it before you read a single line of source.`,
+  ];
+  if (r.name) parts.push('', `LANGUAGE NAME: ${r.name}`);
+  if (r.overview) parts.push('', 'HOW THIS LANGUAGE WORKS, IN THE DREAMER\'S OWN WORDS:', r.overview);
+  if (on.length) {
+    parts.push('', `SYNTAX GLOSSARY — ${on.length} rule${on.length === 1 ? '' : 's'}. Each line is binding: when the construct on the left appears in the source, it means exactly what is on the right.`);
+    for (const x of on) {
+      // A rule that only fills one side is still information: half a rule is a
+      // sentence about the language, and dropping it silently would be worse.
+      if (x.syntax && x.means) parts.push(`  · ${x.syntax}  →  ${x.means}`);
+      else parts.push(`  · ${x.syntax || x.means}`);
+    }
+  }
+  if (ex.length) {
+    parts.push('', `WORKED EXAMPLES — ${ex.length} snippet${ex.length === 1 ? '' : 's'} of ${named} with the dreamer's own explanation of what each one must compile to. Treat these as test cases: source shaped like this compiles like this.`);
+    for (const [i, x] of ex.entries()) {
+      parts.push('', `  ── example ${i + 1} · source ──`, x.source || '(no snippet given)');
+      if (x.means) parts.push(`  ── example ${i + 1} · compiles to ──`, x.means);
+    }
+  }
+  parts.push(
+    '',
+    'Two things this spec does NOT license: it never adds content of its own (the fidelity law still governs everything that reaches the screen — only source lines put things on the page), and where it is silent you fall back to your normal reading. Where it speaks, it wins.',
+    '════════ END OF THE LANGUAGE SPEC ════════',
+  );
+
+  let text = parts.join('\n');
+  let truncated = false;
+  if (text.length > RULES_LIMITS.total) {
+    text = `${text.slice(0, RULES_LIMITS.total)}\n… (the language spec was truncated here because of its length — the rules above still apply)\n════════ END OF THE LANGUAGE SPEC ════════`;
+    truncated = true;
+  }
+  return { text, ruleCount: on.length, exampleCount: ex.length, chars: text.length, truncated };
+}
+
+// what both /api/rules and /api/rules/* answer with
+function rulesPayload(rules = readRules()) {
+  const r = normalizeRules(rules);
+  const compiled = compileRules(r);
+  return {
+    rules: r,
+    limits: RULES_LIMITS,
+    compiled: { text: compiled.text, chars: compiled.chars, ruleCount: compiled.ruleCount, exampleCount: compiled.exampleCount, truncated: compiled.truncated },
+    active: !!compiled.text,
+  };
+}
+
+>>>>>>> df90e14 (Changes)
 // ---------------------------------------------------------------- compiler prompt
 
 const COMPILER_SYSTEM = `You are the ImagineCode Compiler — the compiler for programming languages that don't exist yet.
@@ -161,7 +701,18 @@ LAW 2 — COMPILE WHAT IS WRITTEN. ONLY WHAT IS WRITTEN. (the fidelity law)
 LAW 3 — SOURCE SCOPE:
 - Compile the ENTRY file. Other workspace files are modules: include one ONLY if the entry file references it by name. Unreferenced files do not exist for this build — never merge them in.
 
+<<<<<<< HEAD
 HOW TO READ THE LANGUAGE:
+=======
+LAW 4 — THE DREAMER'S SPEC IS THE SPEC (the authority law):
+- When the prompt contains a section marked THE LANGUAGE SPEC, it was written by the person who invented this language, and it is the authoritative definition of it. Read it before the source.
+- Anything it defines is settled: its meaning for a symbol, keyword, block or construct overrides the general reading heuristics below, and overrides any interpretation you find more natural. If the spec says \`~>\` means "fades in over two seconds", it does not mean "flows into", however much it looks like it.
+- Its worked examples are test cases. Source shaped like an example compiles the way that example says it compiles.
+- The spec defines MEANING, never content: it can tell you that \`bloom\` means a card that scales up on hover, it cannot put a card on the page. Only the source files do that, and LAW 2 still governs every pixel.
+- Where the spec is silent, fall back to the heuristics below. Where it speaks, it wins. Never contradict it, never argue with it, and never mention it in your build log.
+
+HOW TO READ THE LANGUAGE (defaults — any of these yields to the dreamer's spec):
+>>>>>>> df90e14 (Changes)
 - Indentation, nesting and blocks = structure and hierarchy.
 - "quoted text" = literal copy for the screen — reproduce exactly, including emoji.
 - [square brackets] = interactive elements the source declares.
@@ -179,23 +730,62 @@ INCREMENTAL BUILDS:
 - When the prompt is marked INCREMENTAL, the compiled site already exists. Read index.html first, then apply the smallest possible changes with the Edit tool so the file reflects exactly the source changes — and only the changes. Never regenerate from scratch. Everything the diff does not require must remain untouched, so the site stays consistent build to build.
 
 PROCESS:
+<<<<<<< HEAD
 1. Read the source below.
+=======
+1. Read the language spec, if one is given. Then read the source below.
+>>>>>>> df90e14 (Changes)
 2. Write (fresh build) or Edit (incremental build) index.html in the current working directory. Touch no other files.
 3. MANDATORY SELF-AUDIT before finishing — Read the index.html you produced and check every piece of visible content:
    (a) every visible string traces to a quoted string or written word in the source;
    (b) no identifier name (MyHeader, button1, …) appears as visible text;
    (c) no invented copy anywhere — declared-but-textless elements are empty;
+<<<<<<< HEAD
    (d) nothing exists that the source didn't declare.
    Fix any violation with the Edit tool before you finish. Do not skip this step.
 4. Your final message: one or two short plain-text sentences for the build log, stating only facts about this build. Describe what you built or changed — NEVER list excluded, unreferenced or unchanged files. Mention only file names that actually appear in the source section above. No markdown, no code fences.`;
 
+=======
+   (d) nothing exists that the source didn't declare;
+   (e) every construct the dreamer's spec defines behaves the way the spec says, not the way it merely looks like it should.
+   Fix any violation with the Edit tool before you finish. Do not skip this step.
+4. Your final message: one or two short plain-text sentences for the build log, stating only facts about this build. Describe what you built or changed — NEVER list excluded, unreferenced or unchanged files. Mention only file names that actually appear in the source section above. No markdown, no code fences.`;
+
+// The agentic path (Claude Code) writes files itself. Direct API providers have
+// no tools, so they hand the finished file back inside one fenced block and we
+// write it. Appended last so it overrides the tool talk in COMPILER_SYSTEM.
+const DIRECT_MODE = `
+
+════════ DIRECT MODE — THIS SECTION OVERRIDES EVERY TOOL INSTRUCTION ABOVE ════════
+You have NO tools in this mode. You cannot read, write or edit files. Ignore every mention of the Write, Edit and Read tools above; the laws about WHAT to compile all still apply, unchanged.
+
+Instead, RETURN the finished file:
+- Emit the COMPLETE contents of index.html inside exactly ONE fenced code block opened with \`\`\`html and closed with \`\`\`.
+- The block must be the whole file, from <!doctype html> to </html>. Never truncate it, never abbreviate it, and never write placeholders like "… rest unchanged …" or "// same as before".
+- Emit nothing before the block except (optionally) your brief reasoning.
+- After the closing fence, write one or two short plain-text sentences for the build log — facts about this build only. No markdown, no second code block.
+- On an INCREMENTAL build the current index.html is given to you. Return the FULL updated file with the smallest possible changes applied; everything the source diff does not require must come back byte-for-byte identical.
+- Run the mandatory self-audit against the file you are about to emit (every visible string traces to the source; no identifier names on screen; no invented copy; nothing undeclared; every construct the dreamer's spec defines behaves as the spec says) and fix violations before you emit it.`;
+
+>>>>>>> df90e14 (Changes)
 function targetLine(format) {
   return format === 'react'
     ? 'React — one self-contained index.html using React 18 UMD + ReactDOM UMD + Babel Standalone from CDN, app written as React function components with hooks in <script type="text/babel">.'
     : 'HTML — one self-contained index.html with inline <style> and <script>.';
 }
 
+<<<<<<< HEAD
 function buildRenderPrompt({ files, entryPath, format, instructions }) {
+=======
+// The spec goes AHEAD of the source in both prompt builders: the compiler should
+// know what the language means before it meets a line of it, not reinterpret
+// what it has already read.
+function specParts(compiled) {
+  return compiled?.text ? ['', compiled.text] : [];
+}
+
+function buildRenderPrompt({ files, entryPath, format, instructions, spec, direct }) {
+>>>>>>> df90e14 (Changes)
   const entryFile = files.find((f) => f.path === entryPath) || files[0];
   const others = files.filter((f) => f !== entryFile);
   const parts = [
@@ -204,6 +794,7 @@ function buildRenderPrompt({ files, entryPath, format, instructions }) {
     'Compile the entry file. Modules below are included ONLY if the entry file references them by name — otherwise ignore them completely.',
   ];
   if (instructions?.trim()) parts.push(`STANDING BUILD NOTES FROM THE DREAMER: ${instructions.trim()}`);
+<<<<<<< HEAD
   parts.push('', `════════ ENTRY file: ${entryFile.path} ════════`, entryFile.content);
   for (const f of others) parts.push('', `════════ module (only if referenced by the entry): ${f.path} ════════`, f.content);
   parts.push('', 'Compile now — exactly what is written, nothing else. Remember the fidelity law: identifiers are never visible text, textless elements stay empty, and nothing may exist without a source line. Write index.html, run the mandatory self-audit, then give the short build log message.');
@@ -215,10 +806,40 @@ function buildIncrementalPrompt({ files, entryPath, format, instructions, notesC
   const parts = [
     'INCREMENTAL BUILD — the compiled site already exists as index.html in the current directory.',
     'Read index.html, then apply the SMALLEST edits that make it reflect the source changes below — and ONLY those changes. Use the Edit tool; do not rewrite the file. Everything not required by the changes must remain byte-for-byte untouched.',
+=======
+  parts.push(...specParts(spec));
+  parts.push('', `════════ ENTRY file: ${entryFile.path} ════════`, entryFile.content);
+  for (const f of others) parts.push('', `════════ module (only if referenced by the entry): ${f.path} ════════`, f.content);
+  parts.push('', `Compile now — exactly what is written, nothing else. Remember the fidelity law: identifiers are never visible text, textless elements stay empty, and nothing may exist without a source line.${spec?.text ? ' The dreamer\'s language spec above defines what the constructs mean — honour every rule in it.' : ''} ${direct
+    ? 'Return the complete index.html in one ```html block, then the short build log message.'
+    : 'Write index.html, run the mandatory self-audit, then give the short build log message.'}`);
+  return parts.join('\n');
+}
+
+function buildIncrementalPrompt({ files, entryPath, format, instructions, notesChanged, specChanged, spec, changes, direct, currentHtml }) {
+  const entryFile = files.find((f) => f.path === entryPath) || files[0];
+  const parts = [
+    'INCREMENTAL BUILD — the compiled site already exists as index.html in the current directory.',
+    direct
+      ? 'The current index.html is reproduced below. Return the FULL updated file with the SMALLEST possible changes applied — and ONLY those changes. Everything not required by the changes must come back byte-for-byte identical.'
+      : 'Read index.html, then apply the SMALLEST edits that make it reflect the source changes below — and ONLY those changes. Use the Edit tool; do not rewrite the file. Everything not required by the changes must remain byte-for-byte untouched.',
+>>>>>>> df90e14 (Changes)
     `TARGET FORMAT: ${targetLine(format)} (unchanged)`,
     `ENTRY FILE: ${entryPath}`,
   ];
   if (instructions?.trim()) parts.push(`STANDING BUILD NOTES${notesChanged ? ' (these changed since the last build — re-apply where relevant)' : ''}: ${instructions.trim()}`);
+<<<<<<< HEAD
+=======
+  parts.push(...specParts(spec));
+  // A spec edit is a change to what the EXISTING build means, which no source
+  // diff will show. Saying so is the only thing that makes the compiler re-read
+  // the parts of the site the diff doesn't mention.
+  if (specChanged) {
+    parts.push('', spec?.text
+      ? 'THE LANGUAGE SPEC ABOVE CHANGED SINCE THE LAST BUILD. Re-read it, then re-check the existing build against it: anything the previous build got wrong under the old spec (or under a guess, where there was no spec) must be corrected now, even where the source did not change. Keep the edits minimal and targeted — this is still an incremental build.'
+      : 'THE LANGUAGE SPEC WAS REMOVED SINCE THE LAST BUILD. Keep the existing build as it is except where the source changes below require otherwise — do not undo interpretations that still match the source.');
+  }
+>>>>>>> df90e14 (Changes)
   parts.push('', 'SOURCE CHANGES SINCE THE LAST BUILD:');
   for (const c of changes.changed) {
     parts.push('', `════════ ${c.path} — PREVIOUS version ════════`, c.prev, '', `════════ ${c.path} — CURRENT version ════════`, c.curr);
@@ -228,10 +849,94 @@ function buildIncrementalPrompt({ files, entryPath, format, instructions, notesC
   parts.push('', 'FULL CURRENT SOURCE for fidelity reference — the existing build traces to these files (entry first, then modules that count only if the entry references them). Content that traces to any of them is legitimate; do NOT remove it unless the diff above removed its source line:');
   parts.push('', `════════ ENTRY: ${entryFile?.path ?? entryPath} ════════`, entryFile?.content ?? '');
   for (const f of files.filter((x) => x !== entryFile)) parts.push('', `════════ module: ${f.path} ════════`, f.content);
+<<<<<<< HEAD
   parts.push('', 'Apply the minimal edits now — change only what the diff requires, verify against the FULL source (identifiers never visible, no invented copy, nothing unwritten, nothing written removed). Then give the short build log message.');
   return parts.join('\n');
 }
 
+=======
+  if (direct && currentHtml) parts.push('', '════════ CURRENT index.html — the build you are updating ════════', currentHtml);
+  parts.push('', `Apply the minimal edits now — change only what the diff requires, verify against the FULL source (identifiers never visible, no invented copy, nothing unwritten, nothing written removed)${spec?.text ? ', and against the dreamer\'s language spec above (every construct it defines behaves as it says)' : ''}. ${direct
+    ? 'Return the complete updated index.html in one ```html block, then the short build log message.'
+    : 'Then give the short build log message.'}`);
+  return parts.join('\n');
+}
+
+// ---------------------------------------------------------------- direct build plumbing
+
+// Splits a streamed response into prose (build log / reasoning, shown verbatim
+// in the Imagine Terminal) and code (shown as a live byte counter — nobody
+// wants 60KB of markup scrolling past). Fence markers can straddle chunk
+// boundaries, so the tail is held back until it can't be a partial fence.
+function makeSink(res) {
+  let full = '', pending = '', inCode = false, codeChars = 0, lastTick = 0;
+  const tick = (force) => {
+    if (!force && Date.now() - lastTick < 300) return;
+    lastTick = Date.now();
+    ndjson(res, { type: 'code', chars: codeChars });
+  };
+  const out = (s) => {
+    if (inCode) { codeChars += s.length; tick(); }
+    else ndjson(res, { type: 'delta', text: s });
+  };
+  return {
+    text(s) {
+      full += s;
+      pending += s;
+      for (;;) {
+        const i = pending.indexOf('```');
+        if (i === -1) {
+          const keep = Math.min(2, pending.length); // could be a fence being born
+          const emit = pending.slice(0, pending.length - keep);
+          pending = pending.slice(pending.length - keep);
+          if (emit) out(emit);
+          return;
+        }
+        if (i) out(pending.slice(0, i));
+        pending = pending.slice(i + 3);
+        inCode = !inCode;
+        if (inCode) ndjson(res, { type: 'stage', text: 'writing index.html…' });
+      }
+    },
+    end() {
+      if (pending) { out(pending); pending = ''; }
+      tick(true);
+      return full;
+    },
+    get codeChars() { return codeChars; },
+  };
+}
+
+// Pulls index.html and the build-log sentence out of the model's reply.
+function extractBuild(text) {
+  let html = null, log = '';
+  const blocks = [...text.matchAll(/```[a-zA-Z]*[ \t]*\r?\n([\s\S]*?)```/g)];
+  if (blocks.length) {
+    const best = blocks.reduce((a, b) => (b[1].length > a[1].length ? b : a));
+    html = best[1];
+    log = text.slice(best.index + best[0].length).trim() || text.slice(0, best.index).trim();
+  } else {
+    // unterminated fence, or a model that skipped the fence entirely
+    const i = text.search(/<!doctype html|<html[\s>]/i);
+    if (i >= 0) {
+      const end = text.toLowerCase().lastIndexOf('</html>');
+      html = end > i ? text.slice(i, end + 7) : text.slice(i);
+      log = text.slice(0, i).replace(/```[a-zA-Z]*\s*$/, '').trim();
+    }
+  }
+  if (html != null) html = html.replace(/\s+$/, '') + '\n';
+  log = log.replace(/```[\s\S]*?```/g, '').replace(/^#+\s*/gm, '').trim().slice(0, 600);
+  return { html, log };
+}
+
+function estimateCost(modelInfo, usage) {
+  const p = modelInfo?.price;
+  if (!p || (!usage.in && !usage.out)) return null;
+  return ((usage.in || 0) * p.in + (usage.out || 0) * p.out) / 1_000_000;
+}
+
+
+>>>>>>> df90e14 (Changes)
 const MANIFEST = () => path.join(OUTPUT, '.imaginecode-build.json');
 async function readManifest() {
   try { return JSON.parse(await fs.readFile(MANIFEST(), 'utf8')); } catch { return null; }
@@ -249,12 +954,108 @@ function diffSources(prev, files) {
 
 // ---------------------------------------------------------------- API: connection
 
+<<<<<<< HEAD
 app.get('/api/status', (req, res) => {
   res.json({ ...state.connection, models: MODELS, defaultModel: DEFAULT_MODEL, lastBuild: state.lastBuild, building: !!state.render });
 });
 
 app.post('/api/connect', async (req, res) => {
   const t0 = Date.now();
+=======
+app.get('/api/status', async (req, res) => {
+  const providers = {};
+  for (const id of Object.keys(PROVIDERS)) providers[id] = await providerPayload(id);
+  const spec = compileRules(readRules());
+  res.json({
+    ...conn('claude-code'),            // legacy top level = the Claude Code connection
+    models: MODELS, defaultModel: DEFAULT_MODEL,
+    providers, defaultProvider: DEFAULT_PROVIDER,
+    // whether a language spec is in play is part of "what will the next build do"
+    rules: { active: !!spec.text, ruleCount: spec.ruleCount, exampleCount: spec.exampleCount },
+    lastBuild: state.lastBuild, building: !!state.render,
+  });
+});
+
+app.get('/api/providers', async (req, res) => {
+  const providers = {};
+  for (const id of Object.keys(PROVIDERS)) providers[id] = await providerPayload(id);
+  res.json({ providers, defaultProvider: DEFAULT_PROVIDER });
+});
+
+// Save (or clear) a key. The key itself is never echoed back — only its mask.
+app.put('/api/provider/key', async (req, res) => {
+  const { provider, key } = req.body || {};
+  const p = PROVIDERS[provider];
+  if (!p || !p.needsKey) return res.status(400).json({ error: 'Unknown provider' });
+  const keys = { ...readKeys() };
+  const trimmed = String(key ?? '').trim();
+  if (trimmed) keys[provider] = trimmed; else delete keys[provider];
+  try { await writeKeys(keys); } catch (err) { return res.status(500).json({ error: `Could not save the key — ${err.message}` }); }
+  delete liveCache[provider];
+  state.connections[provider] = { connected: false, checkedAt: null, error: null };
+  res.json(await providerPayload(provider));
+});
+
+app.delete('/api/provider/key', async (req, res) => {
+  const provider = String(req.query.provider || '');
+  if (!PROVIDERS[provider]) return res.status(400).json({ error: 'Unknown provider' });
+  const keys = { ...readKeys() };
+  delete keys[provider];
+  try { await writeKeys(keys); } catch (err) { return res.status(500).json({ error: err.message }); }
+  delete liveCache[provider];
+  state.connections[provider] = { connected: false, checkedAt: null, error: null };
+  res.json(await providerPayload(provider));
+});
+
+// force a fresh GET /v1/models
+app.post('/api/provider/models/refresh', async (req, res) => {
+  const provider = String(req.body?.provider || '');
+  if (!PROVIDERS[provider]) return res.status(400).json({ error: 'Unknown provider' });
+  delete liveCache[provider];
+  res.json(await providerPayload(provider));
+});
+
+app.post('/api/connect', async (req, res) => {
+  const providerId = PROVIDERS[req.body?.provider] ? req.body.provider : DEFAULT_PROVIDER;
+  const t0 = Date.now();
+
+  // ── direct API providers: the key round-trips against GET /v1/models, which
+  //    proves the credential, the network path and which models it can reach
+  if (PROVIDERS[providerId].kind !== 'agent') {
+    const p = PROVIDERS[providerId];
+    const { key, source } = providerKey(providerId);
+    if (!key) {
+      state.connections[providerId] = {
+        connected: false, checkedAt: new Date().toISOString(), method: p.label,
+        error: `No ${p.label} key yet — paste one in Settings → Compiler Provider.`,
+      };
+      return res.json({ ...state.connections[providerId], provider: providerId });
+    }
+    try {
+      const live = await liveModels(providerId);
+      const wanted = req.body?.model;
+      const count = live ? Object.keys(live).length : 0;
+      state.connections[providerId] = {
+        connected: true,
+        checkedAt: new Date().toISOString(),
+        version: count ? `${count} model${count === 1 ? '' : 's'} available` : 'key accepted',
+        method: source === 'saved' ? `${p.label} key` : `${p.label} key (${source})`,
+        latencyMs: Date.now() - t0,
+        error: null,
+        warning: wanted && live && count && !live[wanted]
+          ? `${wanted} isn't in this account's model list — builds with it may 404.` : null,
+      };
+    } catch (err) {
+      state.connections[providerId] = {
+        connected: false, checkedAt: new Date().toISOString(), method: p.label,
+        latencyMs: Date.now() - t0, error: String(err?.message || err).slice(0, 300),
+      };
+    }
+    return res.json({ ...state.connections[providerId], provider: providerId });
+  }
+
+  // ── Claude Code: handshake through the Agent SDK
+>>>>>>> df90e14 (Changes)
   const [version, method] = await Promise.all([claudeVersion(), Promise.resolve(detectAuthMethod())]);
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 90_000);
@@ -271,6 +1072,10 @@ app.post('/api/connect', async (req, res) => {
         settingSources: ['user'],
         abortController: controller,
         env: sdkEnv(),
+<<<<<<< HEAD
+=======
+        ...claudeExec(),
+>>>>>>> df90e14 (Changes)
       },
     });
     let ok = false, resultMsg = null;
@@ -281,7 +1086,11 @@ app.post('/api/connect', async (req, res) => {
       }
     }
     clearTimeout(timeout);
+<<<<<<< HEAD
     state.connection = {
+=======
+    state.connections['claude-code'] = {
+>>>>>>> df90e14 (Changes)
       connected: ok,
       checkedAt: new Date().toISOString(),
       version: version || 'Claude Agent SDK (bundled)',
@@ -291,7 +1100,11 @@ app.post('/api/connect', async (req, res) => {
     };
   } catch (err) {
     clearTimeout(timeout);
+<<<<<<< HEAD
     state.connection = {
+=======
+    state.connections['claude-code'] = {
+>>>>>>> df90e14 (Changes)
       connected: false,
       checkedAt: new Date().toISOString(),
       version: version || null,
@@ -302,7 +1115,188 @@ app.post('/api/connect', async (req, res) => {
         : String(err?.message || err),
     };
   }
+<<<<<<< HEAD
   res.json(state.connection);
+=======
+  res.json({ ...state.connections['claude-code'], provider: 'claude-code' });
+});
+
+// ---------------------------------------------------------------- API: prefs
+//
+// Small key/value bag for things that must outlive a page origin — the desktop
+// app can land on a different port than last time, which would silently reset
+// anything kept in localStorage. "have you seen the introduction yet" is
+// exactly that kind of fact.
+
+const PREFS_FILE = path.join(DATA_DIR, '.imaginecode-prefs.json');
+let prefsCache = null;
+function readPrefs() {
+  if (prefsCache) return prefsCache;
+  try { prefsCache = JSON.parse(readFileSync(PREFS_FILE, 'utf8')); } catch { prefsCache = {}; }
+  return prefsCache;
+}
+
+// write to a sibling then rename, so an interrupted save can never leave a
+// truncated file where the previous good one was
+async function writeJsonAtomic(file, value, mode) {
+  const tmp = `${file}.${process.pid}.tmp`;
+  await fs.writeFile(tmp, JSON.stringify(value, null, 2), mode ? { mode } : undefined);
+  await fs.rename(tmp, file);
+}
+
+app.get('/api/prefs', (req, res) => res.json(readPrefs()));
+
+app.put('/api/prefs', async (req, res) => {
+  const next = { ...readPrefs(), ...(req.body || {}) };
+  try { await writeJsonAtomic(PREFS_FILE, next); }
+  catch (err) { return res.status(500).json({ error: err.message }); }
+  // only trust the cache once the bytes are actually on disk
+  prefsCache = next;
+  res.json(next);
+});
+
+// ---------------------------------------------------------------- API: language rules
+
+app.get('/api/rules', (req, res) => res.json(rulesPayload()));
+
+app.put('/api/rules', async (req, res) => {
+  const next = normalizeRules(req.body?.rules ?? req.body);
+  const prev = readRules();
+  // the timestamp is what the UI shows as "saved just now"; only move it when
+  // something a build would actually notice changed
+  const same = JSON.stringify({ ...prev, updatedAt: null }) === JSON.stringify({ ...next, updatedAt: null });
+  next.updatedAt = same ? prev.updatedAt : new Date().toISOString();
+  try { await writeJsonAtomic(RULES_FILE, next); }
+  catch (err) { return res.status(500).json({ error: `Could not save the language rules — ${err.message}` }); }
+  rulesCache = next;
+  res.json(rulesPayload(next));
+});
+
+// Render an unsaved draft exactly as the compiler would see it, so the editor's
+// preview cannot drift from the real thing.
+app.post('/api/rules/preview', (req, res) => {
+  res.json(rulesPayload(normalizeRules(req.body?.rules ?? req.body)));
+});
+
+// ---------------------------------------------------------------- API: rules from the source
+//
+// Reading your own invented language back to yourself is the hard part of
+// writing it down. This asks the configured provider to do a first pass over the
+// workspace and propose a glossary, which the dreamer then edits — it is never
+// saved automatically, and never overwrites what they already wrote.
+
+const INFER_SYSTEM = `You are a linguist reading source code written in a programming language that does not exist. Your job is to document the language, NOT to compile it, judge it, or improve it.
+
+Return ONLY a JSON object, no prose and no code fence, with exactly this shape:
+{"name":"...","overview":"...","rules":[{"syntax":"...","means":"..."}],"examples":[{"source":"...","means":"..."}]}
+
+- name: what this language appears to be called, or a short apt name for it (max 60 chars). If the source names itself, use that name.
+- overview: 2-5 sentences on how the language works as a whole — its shape, how structure is expressed, what kind of program it describes. Describe the system, not the specific page in front of you.
+- rules: 5-14 entries, most distinctive first. "syntax" is the construct exactly as it appears, generalised with a placeholder where a value varies (e.g. "x -> y", "[ label ]", "vibe = <words>"). "means" is one precise sentence on what a compiler must DO with it. Only include constructs that actually appear in the source. Never invent syntax that isn't there.
+- examples: 1-3 short snippets copied VERBATIM from the source (2-6 lines each), each with one or two sentences on what it must compile to.
+- Describe the LANGUAGE, never the content: "quoted text becomes literal copy on the page", never "the page says we open at six".
+- If a construct's meaning is genuinely ambiguous, say what it most likely means and keep the sentence short — the dreamer will correct you.`;
+
+app.post('/api/rules/infer', async (req, res) => {
+  const providerId = PROVIDERS[req.body?.provider] ? req.body.provider : DEFAULT_PROVIDER;
+  const provider = PROVIDERS[providerId];
+  const direct = provider.kind !== 'agent';
+
+  const files = await collectSources(WORKSPACE);
+  if (!files.length) return res.status(400).json({ error: 'The workspace is empty — write some of your language first, then ask for a reading.' });
+
+  // the entry file leads; the rest are context, trimmed so a big workspace
+  // can't turn one convenience button into an enormous bill
+  const entryPath = files.some((f) => f.path === req.body?.entry) ? req.body.entry : files[0].path;
+  const entryFile = files.find((f) => f.path === entryPath);
+  const others = files.filter((f) => f !== entryFile);
+  let budget = 60_000;
+  const parts = [`════════ ${entryFile.path} ════════`, entryFile.content.slice(0, budget)];
+  budget -= Math.min(budget, entryFile.content.length);
+  for (const f of others) {
+    if (budget <= 2000) { parts.push('', `(${others.length - others.indexOf(f)} further file(s) omitted for length)`); break; }
+    const slice = f.content.slice(0, budget);
+    parts.push('', `════════ ${f.path} ════════`, slice);
+    budget -= slice.length;
+  }
+  const prompt = `Document the language these files are written in.\n\n${parts.join('\n')}\n\nReturn only the JSON object.`;
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 180_000);
+  res.on('close', () => { if (!res.writableEnded) controller.abort(); });
+  // The reading can take minutes, and the dreamer is free to close the tab or
+  // navigate away in the middle of it. Every answer goes through here so a late
+  // reply to a client that has already gone is dropped rather than thrown.
+  const reply = (status, body) => { if (!res.writableEnded) res.status(status).json(body); };
+
+  try {
+    let text = '';
+    if (direct) {
+      const { key: apiKey } = providerKey(providerId);
+      if (!apiKey) return reply(400, { error: `No ${provider.label} key saved — add one in Settings → Compiler Provider.` });
+      const catalog = mergeCatalog(providerId, liveCache[providerId]?.models || null);
+      const modelId = catalog[req.body?.model] ? req.body.model : (typeof req.body?.model === 'string' && req.body.model.trim()) || provider.defaultModel;
+      const common = {
+        base: provider.base, apiKey, model: modelId,
+        system: INFER_SYSTEM, prompt,
+        maxTokens: Math.min(provider.maxOut || 8000, 8000),
+        signal: controller.signal,
+        onText: (t) => { text += t; },
+        onThink: () => {},
+        onUsage: () => {},
+      };
+      if (provider.kind === 'anthropic') await anthropicStream({ ...common, thinking: null });
+      else await openaiStream({ ...common, maxTokensField: provider.maxTokensField, label: provider.label });
+    } else {
+      const modelId = MODELS[req.body?.model] ? req.body.model : DEFAULT_MODEL;
+      const q = query({
+        prompt,
+        options: {
+          model: modelId,
+          systemPrompt: INFER_SYSTEM,
+          allowedTools: [],
+          maxTurns: 1,
+          settingSources: ['user'],
+          abortController: controller,
+          env: sdkEnv(),
+          ...claudeExec(),
+        },
+      });
+      for await (const msg of q) {
+        if (msg.type === 'result') {
+          if (msg.is_error) throw new Error(String(msg.result || msg.subtype || 'the reading failed'));
+          text = String(msg.result || '');
+        }
+      }
+    }
+    // models fence JSON however they like; take the outermost object
+    let parsed = null;
+    const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+    for (const candidate of [fenced?.[1], text.slice(text.indexOf('{'), text.lastIndexOf('}') + 1), text]) {
+      if (!candidate) continue;
+      try { parsed = JSON.parse(candidate); break; } catch {}
+    }
+    if (!parsed || typeof parsed !== 'object') {
+      return reply(502, { error: `${provider.label} replied without a usable reading of the language. Try again, or write the rules yourself.` });
+    }
+    // proposals are normalized like everything else, but never written to disk —
+    // the dreamer reviews them and presses Save themselves
+    const proposal = normalizeRules({ ...parsed, enabled: true });
+    if (!proposal.overview && !proposal.rules.length) {
+      return reply(502, { error: 'The reading came back empty. Try again with more of your language written down.' });
+    }
+    reply(200, { proposal, from: { provider: providerId, entry: entryPath, files: files.length } });
+  } catch (err) {
+    if (controller.signal.aborted || err?.name === 'AbortError') {
+      return reply(504, { error: 'The reading timed out before it finished.' });
+    }
+    reply(502, { error: String(err?.message || err).slice(0, 300) });
+  } finally {
+    // every path, including the early returns above — a stray 3-minute timer
+    // would otherwise sit on the event loop long after the answer was sent
+    clearTimeout(timeout);
+  }
+>>>>>>> df90e14 (Changes)
 });
 
 // ---------------------------------------------------------------- API: files
@@ -392,9 +1386,24 @@ app.get('/api/search', async (req, res) => {
 // ---------------------------------------------------------------- API: render (the compiler)
 
 app.post('/api/render', async (req, res) => {
+<<<<<<< HEAD
   const { entry, format = 'html', model = DEFAULT_MODEL, effort, instructions, fresh } = req.body || {};
   const modelInfo = MODELS[model] || MODELS[DEFAULT_MODEL];
   const modelId = MODELS[model] ? model : DEFAULT_MODEL;
+=======
+  const { entry, format = 'html', model, effort, instructions, fresh } = req.body || {};
+  const providerId = PROVIDERS[req.body?.provider] ? req.body.provider : DEFAULT_PROVIDER;
+  const provider = PROVIDERS[providerId];
+  const direct = provider.kind !== 'agent';
+
+  // curated entries carry effort/pricing metadata; live-discovered ids don't,
+  // but they are still perfectly valid to compile with — so for direct
+  // providers any non-empty id is passed straight through (a wrong one comes
+  // back as a clear 404 from the provider rather than a silent substitution)
+  const catalog = mergeCatalog(providerId, direct ? liveCache[providerId]?.models || null : null);
+  const modelId = catalog[model] ? model : (direct && typeof model === 'string' && model.trim()) || provider.defaultModel;
+  const modelInfo = catalog[modelId] || {};
+>>>>>>> df90e14 (Changes)
 
   if (state.render) {
     ndjson(state.render.res, { type: 'error', message: 'Superseded by a new build.' });
@@ -417,6 +1426,15 @@ app.post('/api/render', async (req, res) => {
   const finish = () => { if (state.render?.res === res) state.render = null; };
 
   try {
+<<<<<<< HEAD
+=======
+    const { key: apiKey } = direct ? providerKey(providerId) : { key: null };
+    if (direct && !apiKey) {
+      ndjson(res, { type: 'error', message: `No ${provider.label} key saved — add one in Settings → Compiler Provider.` });
+      res.end(); return finish();
+    }
+
+>>>>>>> df90e14 (Changes)
     const files = await collectSources(WORKSPACE);
     if (!files.length) {
       ndjson(res, { type: 'error', message: 'The workspace is empty — imagine something first.' });
@@ -424,16 +1442,32 @@ app.post('/api/render', async (req, res) => {
     }
     const entryPath = files.some((f) => f.path === entry) ? entry : files[0].path;
 
+<<<<<<< HEAD
+=======
+    // The spec is read fresh per build (the dreamer may have just edited it) and
+    // compared against what the last build was compiled under, because an edit
+    // to it changes the meaning of source that did not itself change.
+    const spec = compileRules(readRules());
+
+>>>>>>> df90e14 (Changes)
     // incremental unless: first build, forced fresh, or format/entry changed
     const manifest = fresh ? null : await readManifest();
     const canIncrement = !!manifest && existsSync(path.join(OUTPUT, 'index.html'))
       && manifest.format === format && manifest.entry === entryPath;
     let mode = 'fresh', changes = null;
     const notesChanged = (manifest?.instructions || '') !== (instructions || '');
+<<<<<<< HEAD
     if (canIncrement) {
       changes = diffSources(manifest.sources || {}, files);
       const changeCount = changes.changed.length + changes.added.length + changes.removed.length;
       if (!changeCount && !notesChanged) {
+=======
+    const specNowChanged = (manifest?.spec || '') !== (spec.text || '');
+    if (canIncrement) {
+      changes = diffSources(manifest.sources || {}, files);
+      const changeCount = changes.changed.length + changes.added.length + changes.removed.length;
+      if (!changeCount && !notesChanged && !specNowChanged) {
+>>>>>>> df90e14 (Changes)
         ndjson(res, { type: 'stage', text: 'no changes since the last build — the existing site is already up to date' });
         ndjson(res, { type: 'done', ok: true, seconds: 0, costUsd: 0, url: '/preview/' });
         res.end(); return finish();
@@ -446,18 +1480,98 @@ app.post('/api/render', async (req, res) => {
     }
 
     const effortLevel = modelInfo.supportsEffort ? (effort || modelInfo.effortDefault) : undefined;
+<<<<<<< HEAD
     ndjson(res, { type: 'stage', text: `imagine build --entry ${entryPath} --target ${format} --model ${modelId}${effortLevel ? `[${effortLevel}]` : ''}${mode === 'incremental' ? ' --incremental' : ''}` });
     if (mode === 'incremental') {
       const n = changes.changed.length + changes.added.length + changes.removed.length;
       ndjson(res, { type: 'stage', text: `editing the existing build — ${n} source change${n === 1 ? '' : 's'}${notesChanged ? ' + updated build notes' : ''}, everything else stays untouched` });
+=======
+    ndjson(res, { type: 'stage', text: `imagine build --entry ${entryPath} --target ${format} --via ${providerId} --model ${modelId}${effortLevel ? `[${effortLevel}]` : ''}${mode === 'incremental' ? ' --incremental' : ''}` });
+    if (spec.text) {
+      ndjson(res, { type: 'stage', text: `reading your language spec… ${spec.ruleCount} rule${spec.ruleCount === 1 ? '' : 's'}${spec.exampleCount ? `, ${spec.exampleCount} worked example${spec.exampleCount === 1 ? '' : 's'}` : ''} — the compiler follows these over its own guesses` });
+      if (spec.truncated) ndjson(res, { type: 'stage', text: 'the spec was long enough to be truncated — trim it in Language Rules if the compiler starts missing rules' });
+    }
+    if (mode === 'incremental') {
+      const n = changes.changed.length + changes.added.length + changes.removed.length;
+      ndjson(res, { type: 'stage', text: `${direct ? 'rewriting' : 'editing'} the existing build — ${n} source change${n === 1 ? '' : 's'}${notesChanged ? ' + updated build notes' : ''}${specNowChanged ? ' + updated language spec' : ''}, everything else stays untouched` });
+>>>>>>> df90e14 (Changes)
     } else {
       ndjson(res, { type: 'stage', text: `reading imagination… ${files.length} file${files.length === 1 ? '' : 's'}, ${files.reduce((n, f) => n + f.content.split('\n').length, 0)} lines` });
     }
 
+<<<<<<< HEAD
     const q = query({
       prompt: mode === 'incremental'
         ? buildIncrementalPrompt({ files, entryPath, format, instructions, notesChanged, changes })
         : buildRenderPrompt({ files, entryPath, format, instructions }),
+=======
+    const indexPath = path.join(OUTPUT, 'index.html');
+    const writeManifest = () => fs.writeFile(MANIFEST(), JSON.stringify({
+      entry: entryPath,
+      format,
+      provider: providerId,
+      instructions: instructions || '',
+      // the compiled spec text, so the next build can tell whether the meaning
+      // of the language changed under a site that already exists
+      spec: spec.text || '',
+      sources: Object.fromEntries(files.map((f) => [f.path, f.content])),
+      at: new Date().toISOString(),
+    })).catch(() => {});
+
+    // ══════════ direct API providers: one streamed pass, we write the file ══════════
+    if (direct) {
+      const currentHtml = mode === 'incremental' ? await fs.readFile(indexPath, 'utf8').catch(() => null) : null;
+      const prompt = mode === 'incremental'
+        ? buildIncrementalPrompt({ files, entryPath, format, instructions, notesChanged, specChanged: specNowChanged, spec, changes, direct: true, currentHtml })
+        : buildRenderPrompt({ files, entryPath, format, instructions, spec, direct: true });
+
+      ndjson(res, { type: 'stage', text: `compiler online · ${provider.label} · ${modelId}` });
+      const sink = makeSink(res);
+      const usage = { in: 0, out: 0 };
+      const common = {
+        base: provider.base, apiKey, model: modelId,
+        system: COMPILER_SYSTEM + DIRECT_MODE, prompt,
+        maxTokens: provider.maxOut, effort: effortLevel, signal: controller.signal,
+        onText: (t) => sink.text(t),
+        onThink: (t) => ndjson(res, { type: 'think', text: t }),
+        onUsage: (u) => Object.assign(usage, u),
+      };
+      const { stopReason } = provider.kind === 'anthropic'
+        ? await anthropicStream({ ...common, thinking: modelInfo.thinking })
+        : await openaiStream({ ...common, maxTokensField: provider.maxTokensField, label: provider.label });
+      const full = sink.end();
+
+      const seconds = ((Date.now() - t0) / 1000).toFixed(1);
+      if (stopReason === 'max_tokens' || stopReason === 'length') {
+        ndjson(res, { type: 'error', message: `build failed after ${seconds}s — ${modelId} hit its output limit mid-file. Try a model with a bigger output budget, or split the imagination into smaller files.` });
+        res.end(); return finish();
+      }
+      const { html, log } = extractBuild(full);
+      if (!html || !/<\s*html|<!doctype/i.test(html)) {
+        ndjson(res, { type: 'error', message: `build failed after ${seconds}s — ${provider.label} replied without an index.html code block.` });
+        res.end(); return finish();
+      }
+
+      await fs.mkdir(OUTPUT, { recursive: true });
+      await fs.writeFile(indexPath, html, 'utf8');
+      ndjson(res, { type: 'tool', name: 'Write', file: 'index.html' });
+      await writeManifest();
+
+      const costUsd = estimateCost(modelInfo, usage);
+      conn(providerId).connected = true;
+      conn(providerId).error = null;
+      state.lastBuild = { at: new Date().toISOString(), format, provider: providerId, model: modelId, seconds: Number(seconds), costUsd };
+      ndjson(res, { type: 'summary', text: log || `Compiled ${entryPath} into index.html.` });
+      ndjson(res, { type: 'done', ok: true, seconds: Number(seconds), costUsd, tokens: usage, url: '/preview/' });
+      res.end(); return finish();
+    }
+
+    // ══════════ Claude Code: the agentic path ══════════
+    const q = query({
+      prompt: mode === 'incremental'
+        ? buildIncrementalPrompt({ files, entryPath, format, instructions, notesChanged, specChanged: specNowChanged, spec, changes })
+        : buildRenderPrompt({ files, entryPath, format, instructions, spec }),
+>>>>>>> df90e14 (Changes)
       options: {
         cwd: OUTPUT,
         model: modelId,
@@ -470,6 +1584,10 @@ app.post('/api/render', async (req, res) => {
         maxTurns: 30,
         abortController: controller,
         env: sdkEnv(),
+<<<<<<< HEAD
+=======
+        ...claudeExec(),
+>>>>>>> df90e14 (Changes)
       },
     });
 
@@ -498,6 +1616,7 @@ app.post('/api/render', async (req, res) => {
     }
 
     const seconds = ((Date.now() - t0) / 1000).toFixed(1);
+<<<<<<< HEAD
     const built = existsSync(path.join(OUTPUT, 'index.html'));
 
     if (finalResult && !finalResult.is_error && built) {
@@ -511,6 +1630,15 @@ app.post('/api/render', async (req, res) => {
         sources: Object.fromEntries(files.map((f) => [f.path, f.content])),
         at: new Date().toISOString(),
       })).catch(() => {});
+=======
+    const built = existsSync(indexPath);
+
+    if (finalResult && !finalResult.is_error && built) {
+      const costUsd = finalResult.total_cost_usd ?? null;
+      state.lastBuild = { at: new Date().toISOString(), format, provider: providerId, model: modelId, seconds: Number(seconds), costUsd };
+      conn('claude-code').connected = true;
+      await writeManifest();
+>>>>>>> df90e14 (Changes)
       ndjson(res, { type: 'summary', text: finalResult.result || '' });
       ndjson(res, { type: 'done', ok: true, seconds: Number(seconds), costUsd, url: '/preview/' });
     } else if (controller.signal.aborted) {
@@ -520,10 +1648,21 @@ app.post('/api/render', async (req, res) => {
       ndjson(res, { type: 'error', message: `build failed after ${seconds}s — ${String(reason).slice(0, 400)}` });
     }
   } catch (err) {
+<<<<<<< HEAD
     if (controller.signal.aborted) {
       ndjson(res, { type: 'error', message: 'build stopped' });
     } else {
       ndjson(res, { type: 'error', message: `compiler crashed — ${String(err?.message || err).slice(0, 400)}` });
+=======
+    if (controller.signal.aborted || err?.name === 'AbortError') {
+      ndjson(res, { type: 'error', message: 'build stopped' });
+    } else {
+      // an already-explained provider error (401, 429, output limit…) reads better
+      // on its own than wrapped in "the compiler crashed"
+      const raw = String(err?.message || err).slice(0, 400);
+      const explained = direct && /\b(4\d\d|5\d\d)\b|key|limit|quota|credit/i.test(raw);
+      ndjson(res, { type: 'error', message: explained ? raw : `compiler crashed — ${raw}` });
+>>>>>>> df90e14 (Changes)
     }
   }
   res.end();
@@ -552,29 +1691,98 @@ app.use('/preview', (req, res, next) => {
   next();
 }, express.static(OUTPUT));
 
+<<<<<<< HEAD
+=======
+// Monaco is vendored into node_modules so the desktop app has a working editor
+// with no internet at all; a bare checkout that skipped the dependency still
+// falls back to the CDN through IMAGINE_ENV below.
+// The path carries the version so the immutable caching is honest — an app
+// update ships a different URL rather than a browser cache full of last
+// release's editor.
+if (hasLocalMonaco) app.use(MONACO_BASE, express.static(MONACO_LOCAL, { maxAge: '7d', immutable: true }));
+
+// what the front end needs to know about the process serving it
+app.get('/env.js', (req, res) => {
+  res.type('application/javascript').send(
+    `window.IMAGINE_ENV=${JSON.stringify({
+      monacoBase: hasLocalMonaco ? MONACO_BASE : MONACO_CDN,
+      monacoCdn: MONACO_CDN,
+      desktop: !!process.env.IMAGINECODE_DESKTOP,
+      version: process.env.IMAGINECODE_VERSION || null,
+    })};`
+  );
+});
+
+>>>>>>> df90e14 (Changes)
 app.use(express.static(PUBLIC));
 
 // ---------------------------------------------------------------- boot
 
+<<<<<<< HEAD
+=======
+// A brand-new install opens on an empty explorer, which is a bleak first
+// impression for an IDE whose whole point is "look what you can write".
+// The seed imaginations are copied in exactly once, and never restored after
+// the dreamer deletes them.
+async function seedWorkspace() {
+  if (!existsSync(SEED)) return;
+  // the flag, not the emptiness of the directory, is what makes this once-only:
+  // deleting both examples should not conjure them back on the next launch
+  if (readPrefs().seeded) return;
+  let existing = [];
+  try { existing = await fs.readdir(WORKSPACE); } catch {}
+  if (existing.length) return;
+  try {
+    await fs.cp(SEED, WORKSPACE, { recursive: true });
+    const next = { ...readPrefs(), seeded: true };
+    await writeJsonAtomic(PREFS_FILE, next);
+    prefsCache = next;
+  } catch (err) {
+    console.error('could not seed the workspace —', err.message);
+  }
+}
+
+>>>>>>> df90e14 (Changes)
 async function ensureDirs() {
   await fs.mkdir(WORKSPACE, { recursive: true });
   await fs.mkdir(OUTPUT, { recursive: true });
   await fs.mkdir(PUBLIC, { recursive: true });
+<<<<<<< HEAD
+=======
+  await seedWorkspace();
+>>>>>>> df90e14 (Changes)
 }
 
 const BASE_PORT = Number(process.env.PORT) || 3333;
 async function start(port, attempt = 0) {
   await ensureDirs();
+<<<<<<< HEAD
   const server = app.listen(port, () => {
+=======
+  const server = app.listen(port, '127.0.0.1', () => {
+>>>>>>> df90e14 (Changes)
     console.log('');
     console.log('  ✦ ImagineCode — the compiler for languages that don\'t exist yet');
     console.log(`  ✦ IDE:     http://localhost:${port}`);
     console.log(`  ✦ Preview: http://localhost:${port}/preview/`);
     console.log('');
+<<<<<<< HEAD
   });
   server.on('error', (err) => {
     if (err.code === 'EADDRINUSE' && attempt < 10) start(port + 1, attempt + 1);
     else { console.error(err); process.exit(1); }
+=======
+    // the desktop shell waits for this before it opens a window
+    process.send?.({ type: 'listening', port, url: `http://127.0.0.1:${port}` });
+  });
+  server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE' && attempt < 10) start(port + 1, attempt + 1);
+    else {
+      console.error(err);
+      process.send?.({ type: 'fatal', message: String(err?.message || err) });
+      process.exit(1);
+    }
+>>>>>>> df90e14 (Changes)
   });
 }
 start(BASE_PORT);

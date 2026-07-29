@@ -1,0 +1,47 @@
+# bean-there.imagine
+# a language made of sentences. there is no grammar. write what you see.
+
+imagine a page for a small coffee shop.
+  the mood is: warm, unhurried, a little bit wooden.
+  the background is the colour of oat milk, the text is the colour of espresso.
+
+at the very top, a slim bar.
+  on its left, in a friendly rounded font, the words "Bean There"
+  on its right, three quiet links: "menu" · "hours" · "find us"
+  the bar stays stuck to the top when the page scrolls.
+
+below it, a tall opening scene, centered.
+  a very large line of text: "we open at six."
+  under it, smaller and softer: "the good beans go first."
+  under that, [ see today's menu ] — a rounded button the colour of espresso.
+  when someone clicks it, the page glides down to the menu.
+
+then the menu.
+  a heading: "today"
+  three cards side by side, each with a thin border and generous whitespace:
+
+    card one
+      "flat white"
+      "£3.20"
+      "milk, folded not poured"
+
+    card two
+      "cortado"
+      "£3.00"
+      "small, serious, gone in four sips"
+
+    card three
+      "filter"
+      "£2.60"
+      "whatever the roaster is excited about this week"
+
+  when the mouse hovers a card it lifts a few pixels and its shadow deepens.
+  on a narrow screen the three cards stack into one column.
+
+then the hours.
+  a heading: "hours"
+  "weekdays — 6am until the pastries run out"
+  "weekends — 8am, slower, better"
+
+then, at the very bottom, one small line, centered and faint:
+  "made of beans and imagination"

@@ -1,0 +1,40 @@
+import {motion}
+import {stockphotos FROM https://picsum.photos/}
+import design {pozadina.design}
+
+
+create page AS HOME {
+
+  create header AS Header [
+
+    design Header AS (
+      background = Black;
+      effect = changeTo(Red).OnMouseMovement;
+    )
+    function Menu (
+      title.text = "Home";
+      title.text = "About";
+      title.text = "Contact";
+    )
+
+    design Menu AS (
+      Menu.font = "Space Grotesk";
+      Menu.font.size = 32px;
+      Menu.font.color = White;
+      Menu.center = true;
+    )
+  ]
+}
+
+create segment AS Hero {
+  Hero.size = fullWidth;
+  Hero.background = SEARCH 'dog' ON stockphotos;
+  Hero.blur = 3%;
+  Hero.text.Overlay = "This is a text";
+  Hero.text.Font = "Space Grotesk"; & Font.Size = 42px;
+  Hero.text.Center = true;
+  Hero.text.Color = "White";
+  Hero.button.Overlay = "This is a button";
+  Hero.button.Color = "White";
+  Hero.button.Text.Color = "Black";
+}

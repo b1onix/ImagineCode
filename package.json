@@ -1,5 +1,6 @@
 {
   "name": "imaginecode",
+<<<<<<< HEAD
   "version": "1.0.0",
   "description": "The IDE for programming languages that don't exist yet — imagine your own language, Claude Code compiles it into a real website.",
   "type": "module",
@@ -7,12 +8,90 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js"
+=======
+  "productName": "ImagineCode",
+  "version": "1.0.0",
+  "description": "The IDE for programming languages that don't exist yet — imagine your own language, Claude Code compiles it into a real website.",
+  "author": {
+    "name": "ImagineCode"
+  },
+  "license": "MIT",
+  "type": "module",
+  "main": "electron/main.cjs",
+  "scripts": {
+    "start": "electron .",
+    "web": "node server.js",
+    "web:dev": "node --watch server.js",
+    "icons": "electron scripts/make-icons.cjs",
+    "pack": "npm run icons && electron-builder --dir",
+    "dist": "npm run icons && electron-builder --win nsis"
+>>>>>>> df90e14 (Changes)
   },
   "engines": {
     "node": ">=18"
   },
   "dependencies": {
     "@anthropic-ai/claude-agent-sdk": "latest",
+<<<<<<< HEAD
     "express": "^4.21.2"
+=======
+    "express": "^4.21.2",
+    "monaco-editor": "^0.52.2"
+  },
+  "devDependencies": {
+    "electron": "^43.2.0",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "appId": "com.imaginecode.app",
+    "productName": "ImagineCode",
+    "copyright": "ImagineCode — there are no syntax errors in imagination",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "asar": false,
+    "files": [
+      "**/*",
+      "!.claude${/*}",
+      "!dist${/*}",
+      "!scripts${/*}",
+      "!workspace${/*}",
+      "!output${/*}",
+      "!.imaginecode-keys.json",
+      "!.imaginecode-prefs.json",
+      "!.imaginecode-rules.json",
+      "!**/*.map",
+      "!node_modules/monaco-editor/{dev,esm,min-maps}${/*}",
+      "!node_modules/monaco-editor/*.d.ts",
+      "!node_modules/@anthropic-ai/claude-agent-sdk/*.d.ts",
+      "!**/{test,tests,__tests__,powered-test,example,examples}${/*}"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "build/icon.ico",
+      "artifactName": "${productName}-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "allowElevation": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "ImagineCode",
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico",
+      "installerHeaderIcon": "build/icon.ico",
+      "deleteAppDataOnUninstall": false,
+      "runAfterFinish": true
+    },
+    "compression": "maximum"
+>>>>>>> df90e14 (Changes)
   }
 }

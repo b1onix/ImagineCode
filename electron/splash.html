@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>ImagineCode</title>
+<!-- Loaded without blocking first paint. A firewall that blackholes fonts.googleapis.com
+     would otherwise hold up DOMContentLoaded — and with it ready-to-show — leaving the
+     user staring at no window at all. The fallback stacks below carry the design. -->
+<link rel="stylesheet" media="print" onload="this.media='all'"
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,300..500&family=Schibsted+Grotesk:wght@400;500;600&family=Fragment+Mono&display=swap">
+<style>
+/* ═══════════════════════════════════════════════════════════════════
+   The boot screen. Everything it says is true — each stage is reported
+   by the shell as it actually happens, so the progress bar is a fact
+   rather than a decoration.
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root {
+  --font-ui: "Schibsted Grotesk", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "Fragment Mono", "Cascadia Mono", Consolas, monospace;
+  --font-display: "Fraunces", Georgia, serif;
+
+  --ink-0: #08080a;
+  --ink-3: #121218;
+  --line-0: #1a1a21;
+  --line-2: #32323e;
+  --bone: #eceae3;
+  --bone-dim: #8f8f9a;
+  --bone-faint: #55555f;
+  --bone-ghost: #33333c;
+  --accent: #c6f24e;
+  --rose: #ff6d5a;
+  --ease: cubic-bezier(.3, .7, .3, 1);
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; background: transparent; overflow: hidden; }
+body {
+  font-family: var(--font-ui);
+  user-select: none;
+  cursor: default;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── the panel ─────────────────────────────────────────────────────── */
+
+#panel {
+  position: absolute; inset: 12px;
+  border-radius: 16px;
+  background:
+    radial-gradient(120% 90% at 50% -10%, #16161d 0%, #0c0c10 46%, #070709 100%);
+  border: 1px solid var(--line-0);
+  box-shadow:
+    0 18px 48px rgba(0, 0, 0, .62),
+    0 2px 0 rgba(255, 255, 255, .03) inset;
+  overflow: hidden;
+  display: flex; flex-direction: column;
+  padding: 30px 34px 22px;
+  -webkit-app-region: drag;
+  animation: panel-in .42s var(--ease) both;
+}
+#panel.leaving { animation: panel-out .38s var(--ease) both; }
+
+@keyframes panel-in  { from { opacity: 0; transform: scale(.962) translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes panel-out { from { opacity: 1; transform: none; } to { opacity: 0; transform: scale(1.035); } }
+
+/* atmosphere: a slow phosphor aurora and the same film grain as the IDE */
+#aurora {
+  position: absolute; inset: -30%;
+  background: radial-gradient(38% 38% at 50% 34%, rgba(198, 242, 78, .13), rgba(198, 242, 78, 0) 70%);
+  animation: drift 11s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes drift {
+  0%, 100% { transform: translate(-3%, -1%) scale(1); }
+  50%      { transform: translate(4%, 3%) scale(1.12); }
+}
+#grain {
+  position: absolute; inset: 0; opacity: .05; pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+/* a hairline of light along the top edge, like every raised surface in the IDE */
+#panel::before {
+  content: ""; position: absolute; left: 18%; right: 18%; top: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(198, 242, 78, .3), transparent);
+}
+
+/* ── the mark ──────────────────────────────────────────────────────── */
+
+#stage { flex: 1; display: grid; place-items: center; position: relative; min-height: 0; }
+.mark { width: 132px; height: 132px; overflow: visible; }
+
+.ring { transform-origin: 100px 100px; }
+.ring circle { fill: none; stroke: var(--accent); }
+.ring-a circle { stroke-width: 1; stroke-opacity: .20; stroke-dasharray: 2.5 11; }
+.ring-b circle { stroke-width: 1.4; stroke-opacity: .40; stroke-dasharray: 30 260; stroke-linecap: round; }
+.ring-a { animation: spin 24s linear infinite, ring-in .8s var(--ease) both; }
+.ring-b { animation: spin 9s linear infinite reverse, ring-in .8s .1s var(--ease) both; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes ring-in { from { opacity: 0; } to { opacity: 1; } }
+
+.star, .bloom { transform-origin: 100px 100px; }
+.star  { fill: url(#sparkGrad); animation: birth 1s cubic-bezier(.16, 1.02, .3, 1) both, breathe 3.4s ease-in-out 1s infinite; }
+.bloom { fill: var(--accent); opacity: .55; filter: blur(10px); animation: birth 1s cubic-bezier(.16, 1.02, .3, 1) both, glowing 3.4s ease-in-out 1s infinite; }
+
+@keyframes birth   { from { transform: rotate(-150deg) scale(.15); opacity: 0; } to { transform: none; } }
+@keyframes breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+@keyframes glowing { 0%, 100% { transform: scale(1); opacity: .5; } 50% { transform: scale(1.16); opacity: .75; } }
+
+/* micro-stars drifting in the field */
+.dust { position: absolute; width: 3px; height: 3px; border-radius: 50%; background: var(--accent); }
+.dust::after {
+  content: ""; position: absolute; inset: -3px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(198, 242, 78, .5), transparent 70%);
+}
+.dust { animation: twinkle 3.6s ease-in-out infinite; }
+@keyframes twinkle {
+  0%, 100% { opacity: .12; transform: scale(.6); }
+  50%      { opacity: .85; transform: scale(1); }
+}
+
+/* ── wordmark ──────────────────────────────────────────────────────── */
+
+#word {
+  text-align: center; color: var(--bone); font-size: 27px; line-height: 1;
+  letter-spacing: -.015em; margin-top: 4px;
+  animation: rise .6s var(--ease) .22s both;
+}
+#word .i {
+  font-family: var(--font-display); font-style: italic; font-weight: 400;
+  font-variation-settings: "opsz" 100; padding-right: 2px;
+}
+#word .c { font-weight: 500; letter-spacing: -.035em; }
+#word .c::after { content: "."; color: var(--accent); }
+
+#tag {
+  margin-top: 11px; text-align: center;
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: .26em;
+  text-transform: uppercase; color: var(--bone-ghost);
+  animation: rise .6s var(--ease) .3s both;
+}
+@keyframes rise { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: none; } }
+
+/* ── progress ──────────────────────────────────────────────────────── */
+
+#foot { margin-top: auto; padding-top: 20px; animation: rise .6s var(--ease) .38s both; }
+
+#rail {
+  position: relative; height: 2px; border-radius: 2px;
+  background: var(--line-0); overflow: hidden;
+}
+#fill {
+  display: block; height: 100%; width: 4%;
+  background: linear-gradient(90deg, #8fc60c, var(--accent) 55%, #eaffb0);
+  box-shadow: 0 0 12px rgba(198, 242, 78, .55);
+  border-radius: 2px;
+  transition: width .65s var(--ease);
+}
+/* a travelling glint, so the bar never looks frozen between real stages */
+#rail::after {
+  content: ""; position: absolute; top: 0; left: 0; height: 100%; width: 34%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .16), transparent);
+  animation: sweep 1.9s var(--ease) infinite;
+}
+@keyframes sweep { 0% { transform: translateX(-120%); } 100% { transform: translateX(420%); } }
+
+#statusrow {
+  display: flex; align-items: center; gap: 8px; margin-top: 11px;
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: .05em;
+  color: var(--bone-faint); min-height: 14px;
+}
+#spark-cursor { color: var(--accent); animation: blink 1.15s steps(1) infinite; }
+@keyframes blink { 0%, 55% { opacity: 1; } 56%, 100% { opacity: .18; } }
+#status { animation: status-in .3s var(--ease); }
+@keyframes status-in { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
+#ver { margin-left: auto; color: var(--bone-ghost); letter-spacing: .08em; }
+
+/* ── failure ───────────────────────────────────────────────────────── */
+
+#panel.failed #stage { opacity: .3; filter: grayscale(.7); transition: opacity .4s, filter .4s; }
+#panel.failed #rail, #panel.failed #spark-cursor { display: none; }
+#err { display: none; margin-top: 10px; }
+#panel.failed #err { display: block; animation: rise .35s var(--ease) both; }
+#err-msg {
+  font-family: var(--font-mono); font-size: 10px; line-height: 1.65; color: var(--rose);
+  max-height: 58px; overflow: hidden; white-space: pre-wrap; word-break: break-word;
+  -webkit-app-region: no-drag; user-select: text;
+}
+#err-actions { display: flex; gap: 8px; margin-top: 12px; -webkit-app-region: no-drag; }
+#err-actions button {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: .04em;
+  padding: 6px 13px; border-radius: 6px; cursor: pointer;
+  background: transparent; border: 1px solid var(--line-2); color: var(--bone-dim);
+  transition: border-color .14s, color .14s;
+}
+#err-actions button:hover { border-color: var(--rose); color: var(--rose); }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+</style>
+</head>
+<body>
+<div id="panel">
+  <div id="aurora"></div>
+  <div id="grain"></div>
+
+  <div id="stage">
+    <svg class="mark" viewBox="0 0 200 200" aria-hidden="true">
+      <defs>
+        <linearGradient id="sparkGrad" x1="0.24" y1="0" x2="0.78" y2="1">
+          <stop offset="0" stop-color="#f6ffdd"/>
+          <stop offset="0.32" stop-color="#dcff77"/>
+          <stop offset="0.7" stop-color="#c6f24e"/>
+          <stop offset="1" stop-color="#9bd016"/>
+        </linearGradient>
+      </defs>
+      <g class="ring ring-a"><circle cx="100" cy="100" r="84"/></g>
+      <g class="ring ring-b"><circle cx="100" cy="100" r="66"/></g>
+      <path class="bloom" d="M100 52 Q105.1 92.8 134 100 Q105.1 107.2 100 148 Q94.9 107.2 66 100 Q94.9 92.8 100 52 Z"/>
+      <path class="star"  d="M100 52 Q105.1 92.8 134 100 Q105.1 107.2 100 148 Q94.9 107.2 66 100 Q94.9 92.8 100 52 Z"/>
+    </svg>
+  </div>
+
+  <div id="word"><span class="i">Imagine</span><span class="c">Code</span></div>
+  <div id="tag">languages that don't exist yet</div>
+
+  <div id="foot">
+    <div id="rail"><i id="fill"></i></div>
+    <div id="statusrow">
+      <span id="spark-cursor">✦</span>
+      <span id="status">starting up</span>
+      <span id="ver"></span>
+    </div>
+    <div id="err">
+      <div id="err-msg"></div>
+      <div id="err-actions">
+        <button id="err-copy">copy details</button>
+        <button id="err-quit">quit</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+const panel = document.getElementById('panel');
+const fill = document.getElementById('fill');
+const status = document.getElementById('status');
+const stage = document.getElementById('stage');
+
+document.getElementById('ver').textContent =
+  new URLSearchParams(location.search).get('v') ? 'v' + new URLSearchParams(location.search).get('v') : '';
+
+// a handful of drifting micro-stars, placed once
+for (const [x, y, delay, scale] of [[18, 26, 0, 1], [78, 20, 1.1, .8], [86, 72, 2.2, 1], [12, 76, 1.6, .7], [50, 8, .6, .6], [64, 88, 2.8, .8]]) {
+  const d = document.createElement('span');
+  d.className = 'dust';
+  d.style.left = x + '%';
+  d.style.top = y + '%';
+  d.style.animationDelay = delay + 's';
+  d.style.transform = `scale(${scale})`;
+  stage.appendChild(d);
+}
+
+// The shell narrates the real boot; these are the fractions each stage lands
+// on so the bar advances honestly instead of on a timer.
+const PROGRESS = {
+  'starting up': 0.06,
+  'waking the compiler daemon': 0.22,
+  'opening a port on localhost': 0.44,
+  'loading the editor': 0.68,
+  'ready': 1,
+};
+
+function setStage(text, progress) {
+  if (text && text !== status.textContent) {
+    status.textContent = text;
+    status.style.animation = 'none';
+    void status.offsetWidth;         // restart the swap animation
+    status.style.animation = '';
+  }
+  const p = progress ?? PROGRESS[text];
+  if (typeof p === 'number') fill.style.width = Math.round(p * 100) + '%';
+}
+
+window.boot?.onStage(({ text, progress }) => setStage(text, progress));
+
+window.boot?.onDone(() => {
+  setStage('ready', 1);
+  setTimeout(() => panel.classList.add('leaving'), 80);
+});
+
+let lastError = '';
+window.boot?.onError(({ message }) => {
+  lastError = message || 'unknown failure';
+  panel.classList.add('failed');
+  status.textContent = 'could not start';
+  document.getElementById('err-msg').textContent = lastError;
+});
+
+document.getElementById('err-copy').onclick = () => {
+  navigator.clipboard?.writeText(lastError);
+  document.getElementById('err-copy').textContent = 'copied ✓';
+};
+document.getElementById('err-quit').onclick = () => window.boot?.quit();
+</script>
+</body>
+</html>

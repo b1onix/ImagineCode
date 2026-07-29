@@ -1,0 +1,56 @@
+// synthwave.dreamjs
+// an invented curly-brace language. no compiler on earth accepts this.
+// this one does.
+
+universe SYNTHWAVE {
+  vibe    -> neon, night-drive, 1984, slightly wet asphalt
+  palette -> #05010f base, #ff2e97 hot, #00e5ff cool, #ffe66d sun
+  font    -> a wide geometric sans for headings, a mono for everything else
+}
+
+scene Sky {
+  background   = vertical gradient from #05010f to #2b0a3d
+  horizon.line = 1px of #ff2e97, glowing
+  grid {
+    perspective = true
+    colour      = #ff2e97 at 40% opacity
+    animate     -> scroll toward the viewer, forever, 6s per loop
+  }
+  sun {
+    shape  = circle
+    fill   = gradient #ffe66d -> #ff2e97
+    slice  = 4 horizontal gaps across the lower half
+    glow   = 80px of #ff2e97
+    float  -> up and down, 4s, gentle
+  }
+}
+
+scene Title over Sky {
+  text.big   = "NIGHT DRIVE"
+  text.big   :: letterspacing 0.18em, uppercase, #ffffff
+  text.big   :: shadow 0 0 22px #00e5ff
+  text.small = "eleven tracks for an empty motorway"
+  text.small :: #00e5ff, mono, 0.9rem
+}
+
+deck Tracklist {
+  columns = 2 on wide screens, 1 on narrow
+
+  track { "01" | "Chrome Rain"        | "3:58" }
+  track { "02" | "Lighthouse Protocol"| "4:41" }
+  track { "03" | "Ghost In The Sedan" | "5:12" }
+  track { "04" | "Neon Grief"         | "3:07" }
+  track { "05" | "Afterglow, Slowly"  | "6:20" }
+  track { "06" | "Static Cassette"    | "4:04" }
+
+  each track {
+    border-left = 2px #00e5ff
+    OnHover     -> border-left becomes #ff2e97, row slides right 6px, 150ms
+    OnClick     -> the row starts pulsing; any other pulsing row stops
+  }
+}
+
+ending Credits {
+  line = "compiled from imagination"
+  line :: centered, #ff2e97 at 60% opacity, mono, small
+}

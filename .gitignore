@@ -4,6 +4,26 @@ node_modules/
 # compiled imagination — regenerated on every Run
 output/
 
+<<<<<<< HEAD
+=======
+# your provider API keys — never commit these
+.imaginecode-keys.json
+
+# local preferences (have you seen the introduction, …)
+.imaginecode-prefs.json
+
+# the rules of the language you invented — yours, not the repo's
+.imaginecode-rules.json
+
+# packaged desktop builds — rebuilt with `npm run dist`
+dist/
+
+# rendered icons — rebuilt with `npm run icons` from build/*.svg
+build/icon.png
+build/icon-256.png
+build/icon.ico
+
+>>>>>>> df90e14 (Changes)
 # logs & OS noise
 *.log
 npm-debug.log*
