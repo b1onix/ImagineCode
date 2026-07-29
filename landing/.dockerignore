@@ -1,0 +1,6 @@
+# nginx.conf is NOT listed here — the Dockerfile copies it into the image.
+Dockerfile
+.dockerignore
+*.md
+.DS_Store
+Thumbs.db

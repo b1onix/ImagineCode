@@ -4,8 +4,6 @@ node_modules/
 # compiled imagination — regenerated on every Run
 output/
 
-<<<<<<< HEAD
-=======
 # your provider API keys — never commit these
 .imaginecode-keys.json
 
@@ -22,8 +20,10 @@ dist/
 build/icon.png
 build/icon-256.png
 build/icon.ico
+# build/icon.icns is deliberately NOT ignored: the macOS runner packages the
+# .dmg without a display, so it can't rasterise the SVG the way `npm run icons`
+# does. The committed .icns is what electron-builder stamps onto the .app.
 
->>>>>>> df90e14 (Changes)
 # logs & OS noise
 *.log
 npm-debug.log*

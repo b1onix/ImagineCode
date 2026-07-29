@@ -106,14 +106,6 @@ button { font-family: var(--font-ui); }
   color: var(--bone-faint); text-align: center; white-space: nowrap; overflow: hidden;
   font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase;
 }
-<<<<<<< HEAD
-.tb-right { display: flex; justify-content: flex-end; align-items: center; padding-right: 14px; }
-.tb-hint {
-  font-family: var(--font-mono); font-size: 10px; letter-spacing: .06em;
-  color: var(--bone-ghost);
-}
-
-=======
 .tb-right { display: flex; justify-content: flex-end; align-items: stretch; padding-right: 14px; }
 .tb-hint {
   font-family: var(--font-mono); font-size: 10px; letter-spacing: .06em;
@@ -146,7 +138,6 @@ body.is-desktop .tb-hint { margin-right: 14px; }
 #winctl.maximized .wc-max { display: none; }
 #winctl.maximized .wc-restore { display: block; }
 
->>>>>>> df90e14 (Changes)
 /* ═══════════════ MAIN LAYOUT ═══════════════ */
 
 #main { flex: 1; display: flex; min-height: 0; }
@@ -484,8 +475,6 @@ body.is-desktop .tb-hint { margin-right: 14px; }
 }
 .model-row.checked .model-badge { background: rgba(198, 242, 78, .18); color: var(--accent); }
 .model-desc { color: var(--bone-faint); font-size: 12px; margin-left: auto; text-align: right; flex: 1 1 150px; min-width: 0; }
-<<<<<<< HEAD
-=======
 .model-row.dim { opacity: .55; }
 .model-row.dim:hover { opacity: 1; }
 .model-price {
@@ -554,7 +543,6 @@ body.is-desktop .tb-hint { margin-right: 14px; }
   background: rgba(240, 139, 212, .08); border-radius: 6px; padding: 6px 10px; line-height: 1.5;
 }
 #sb-provider.needs-setup { color: var(--rose); }
->>>>>>> df90e14 (Changes)
 #set-notes { resize: vertical; font-family: var(--font-mono); font-size: 12px; line-height: 1.7; min-height: 80px; }
 .set-select {
   width: 100%; background: var(--ink-3); border: 1px solid var(--line-1); border-radius: 6px;
@@ -564,10 +552,6 @@ body.is-desktop .tb-hint { margin-right: 14px; }
 .set-select:focus, .set-select:hover { border-color: var(--accent); }
 .set-select option { background: var(--ink-3); color: var(--bone); }
 
-<<<<<<< HEAD
-/* ═══ empty editor ═══ */
-#empty-editor { display: none; place-items: center; }
-=======
 /* ═══════════════ LANGUAGE RULES ═══════════════
    The spec editor. A glossary is a table of pairs, so it is laid out as one —
    monospace on the left where the dreamer's own syntax goes, prose on the
@@ -880,7 +864,6 @@ textarea.rules-input { min-height: 76px; }
 }
 
 /* ═══ empty editor ═══ */#empty-editor { display: none; place-items: center; }
->>>>>>> df90e14 (Changes)
 #empty-editor.active { display: grid; }
 .empty-inner { text-align: center; color: var(--bone-faint); }
 .empty-spark { font-size: 120px; line-height: 1; margin-bottom: 4px; color: var(--ink-4); }
@@ -1052,8 +1035,6 @@ textarea.rules-input { min-height: 76px; }
 .toast-msg { color: var(--bone-dim); margin-top: 2px; }
 .toast-close { border: none; background: none; color: var(--bone-faint); cursor: pointer; font-size: 12px; padding: 0 2px; }
 .toast-close:hover { color: var(--bone); }
-<<<<<<< HEAD
-=======
 /* a toast that recommends something has to be actionable, or it's just a notice */
 .toast.toast-wide { width: 100%; }
 .toast.toast-wide .toast-ico { color: var(--accent); font-family: var(--font-display); font-size: 15px; }
@@ -1064,7 +1045,6 @@ textarea.rules-input { min-height: 76px; }
   transition: background .14s, box-shadow .14s;
 }
 .toast-action:hover { background: var(--accent-hi); box-shadow: 0 2px 14px rgba(198, 242, 78, .26); }
->>>>>>> df90e14 (Changes)
 
 /* ═══════════════ ANIMATION ═══════════════ */
 

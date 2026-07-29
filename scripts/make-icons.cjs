@@ -2,7 +2,8 @@
    ImagineCode — icon builder
    ───────────────────────────────────────────────────────────────────
    Rasterises build/icon.svg (and the simplified build/icon-small.svg)
-   with Chromium, then packs a multi-resolution build/icon.ico.
+   with Chromium, then packs a multi-resolution build/icon.ico for Windows
+   and build/icon.icns for macOS.
 
      npm run icons          # = electron scripts/make-icons.cjs
 
@@ -24,6 +25,21 @@ const BUILD = path.join(ROOT, 'build');
 // legible somewhere around 40px and just muddy the silhouette below that.
 const ICO_SIZES = [256, 128, 64, 48, 40, 32, 24, 20, 16];
 const SMALL_AT_OR_BELOW = 48;
+
+// The slots `iconutil` writes, and the pixel size each one holds. The @2x
+// entries deliberately repeat a size — ic13 is 128@2x and ic08 is 256@1x,
+// both 256 pixels, and macOS wants them both present.
+const ICNS_SLOTS = [
+  ['icp4', 16],
+  ['icp5', 32],
+  ['icp6', 64],
+  ['ic07', 128],
+  ['ic08', 256],
+  ['ic09', 512],
+  ['ic10', 1024],
+  ['ic13', 256],
+  ['ic14', 512],
+];
 
 // deterministic output regardless of the machine's display scaling
 app.disableHardwareAcceleration();
@@ -105,6 +121,26 @@ function packIco(entries) {
   return Buffer.concat([header, dir, ...ordered.map((e) => e.png)]);
 }
 
+// ICNS: an 8-byte file header, then one length-prefixed chunk per slot. The
+// `ic*`/`icp*` types all accept a PNG payload, so this is the same artwork the
+// .ico carries — no macOS tooling involved, which is the point: the mac icon
+// has to be buildable from Windows or it can't be committed ahead of the
+// runner that packages the .dmg.
+function packIcns(entries) {
+  const chunks = entries.map(({ type, png }) => {
+    const head = Buffer.alloc(8);
+    head.write(type, 0, 4, 'ascii');
+    head.writeUInt32BE(png.length + 8, 4);
+    return Buffer.concat([head, png]);
+  });
+
+  const body = Buffer.concat(chunks);
+  const header = Buffer.alloc(8);
+  header.write('icns', 0, 4, 'ascii');
+  header.writeUInt32BE(body.length + 8, 4);
+  return Buffer.concat([header, body]);
+}
+
 async function main() {
   await app.whenReady();
   openStudio();
@@ -126,6 +162,20 @@ async function main() {
   const ico = packIco(entries);
   fs.writeFileSync(path.join(BUILD, 'icon.ico'), ico);
   console.log(`  ✓ build/icon.ico            ${ICO_SIZES.join(', ')} · ${(ico.length / 1024).toFixed(0)} KB`);
+
+  // resizing 1024 → 1024 would re-encode for nothing, so the master is reused
+  const icnsEntries = ICNS_SLOTS.map(([type, size]) => {
+    const src = size <= SMALL_AT_OR_BELOW ? simple : detailed;
+    const png = size === CANVAS ? src.toPNG()
+      : src.resize({ width: size, height: size, quality: 'best' }).toPNG();
+    return { type, size, png };
+  });
+
+  const icns = packIcns(icnsEntries);
+  fs.writeFileSync(path.join(BUILD, 'icon.icns'), icns);
+  console.log(
+    `  ✓ build/icon.icns           ${ICNS_SLOTS.map(([, s]) => s).join(', ')} · ${(icns.length / 1024).toFixed(0)} KB`
+  );
 
   // 256px PNG for the in-app about/splash art and anything that wants a bitmap
   fs.writeFileSync(

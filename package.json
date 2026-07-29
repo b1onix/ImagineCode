@@ -1,14 +1,5 @@
 {
   "name": "imaginecode",
-<<<<<<< HEAD
-  "version": "1.0.0",
-  "description": "The IDE for programming languages that don't exist yet — imagine your own language, Claude Code compiles it into a real website.",
-  "type": "module",
-  "main": "server.js",
-  "scripts": {
-    "start": "node server.js",
-    "dev": "node --watch server.js"
-=======
   "productName": "ImagineCode",
   "version": "1.0.0",
   "description": "The IDE for programming languages that don't exist yet — imagine your own language, Claude Code compiles it into a real website.",
@@ -24,17 +15,16 @@
     "web:dev": "node --watch server.js",
     "icons": "electron scripts/make-icons.cjs",
     "pack": "npm run icons && electron-builder --dir",
-    "dist": "npm run icons && electron-builder --win nsis"
->>>>>>> df90e14 (Changes)
+    "dist": "npm run icons && electron-builder --win nsis",
+    "dist:mac": "npm run icons && electron-builder --mac",
+    "dist:mac:arm": "npm run icons && electron-builder --mac dmg --arm64",
+    "dist:mac:intel": "npm run icons && electron-builder --mac dmg --x64"
   },
   "engines": {
     "node": ">=18"
   },
   "dependencies": {
     "@anthropic-ai/claude-agent-sdk": "latest",
-<<<<<<< HEAD
-    "express": "^4.21.2"
-=======
     "express": "^4.21.2",
     "monaco-editor": "^0.52.2"
   },
@@ -55,6 +45,7 @@
       "**/*",
       "!.claude${/*}",
       "!dist${/*}",
+      "!landing${/*}",
       "!scripts${/*}",
       "!workspace${/*}",
       "!output${/*}",
@@ -91,7 +82,50 @@
       "deleteAppDataOnUninstall": false,
       "runAfterFinish": true
     },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["arm64", "x64"]
+        },
+        {
+          "target": "zip",
+          "arch": ["arm64", "x64"]
+        }
+      ],
+      "icon": "build/icon.icns",
+      "category": "public.app-category.developer-tools",
+      "artifactName": "${productName}-${version}-${arch}.${ext}",
+      "darkModeSupport": true,
+      "hardenedRuntime": false,
+      "gatekeeperAssess": false,
+      "identity": null,
+      "extendInfo": {
+        "NSHumanReadableCopyright": "MIT — there are no syntax errors in imagination"
+      }
+    },
+    "dmg": {
+      "artifactName": "${productName}-${version}-${arch}.${ext}",
+      "title": "ImagineCode ${version}",
+      "backgroundColor": "#08080a",
+      "window": {
+        "width": 560,
+        "height": 380
+      },
+      "contents": [
+        {
+          "x": 158,
+          "y": 190,
+          "type": "file"
+        },
+        {
+          "x": 402,
+          "y": 190,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    },
     "compression": "maximum"
->>>>>>> df90e14 (Changes)
   }
 }

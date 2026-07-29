@@ -24,12 +24,9 @@ const I = {
   stop:     '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="4" y="4" width="8" height="8" rx="0.5"/></svg>',
   clear:    '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="8" cy="8" r="5.6"/><path d="M4.2 11.8 11.8 4.2"/></svg>',
   chevDown: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><path d="m4 6 4 4 4-4"/></svg>',
-<<<<<<< HEAD
-=======
   rules:    '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.1"><path d="M3 2.5h7.5l2.5 2.5v8.5H3z"/><path d="M10.5 2.5v2.5H13"/><path d="M5 7h6M5 9.3h6M5 11.6h3.5"/></svg>',
   trash:    '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M3.2 4.6h9.6M6.4 4.6V3.2h3.2v1.4M4.4 4.6l.6 8.2h6l.6-8.2"/></svg>',
   grip:     '<svg viewBox="0 0 16 16" fill="currentColor"><circle cx="6" cy="4" r="1.1"/><circle cx="10" cy="4" r="1.1"/><circle cx="6" cy="8" r="1.1"/><circle cx="10" cy="8" r="1.1"/><circle cx="6" cy="12" r="1.1"/><circle cx="10" cy="12" r="1.1"/></svg>',
->>>>>>> df90e14 (Changes)
 };
 
 /* ─────────────── state ─────────────── */
@@ -43,13 +40,8 @@ const S = {
   dirty: new Set(),
   expanded: new Set(),
   selectedPath: null,
-<<<<<<< HEAD
-  settings: { format: 'html', model: 'claude-sonnet-5', notes: '', entry: '' },
-  catalog: {},
-=======
   settings: { format: 'html', provider: 'claude-code', model: 'claude-sonnet-5', models: {}, notes: '', entry: '' },
   providers: {},             // id -> { label, models, hasKey, keyMask, connection, … }
->>>>>>> df90e14 (Changes)
   connection: { connected: false },
   building: false,
   previewOpen: false,
@@ -58,17 +50,6 @@ const S = {
 let editor = null;
 let tabSeq = 0;
 
-<<<<<<< HEAD
-/* ─────────────── settings persistence ─────────────── */
-function loadLocal() {
-  try { Object.assign(S.settings, JSON.parse(localStorage.getItem('imaginecode.settings') || '{}')); } catch {}
-  try { S.recents = JSON.parse(localStorage.getItem('imaginecode.recents') || '[]'); } catch {}
-}
-function saveSettings() { localStorage.setItem('imaginecode.settings', JSON.stringify(S.settings)); updateStatusChips(); }
-function pushRecent(p) {
-  S.recents = [p, ...S.recents.filter((r) => r !== p)].slice(0, 6);
-  localStorage.setItem('imaginecode.recents', JSON.stringify(S.recents));
-=======
 /* ─────────────── provider helpers ─────────────── */
 const prov = (id = S.settings.provider) => S.providers[id] || null;
 function curModel() {
@@ -136,7 +117,6 @@ function pushRecent(p) {
   S.recents = [p, ...S.recents.filter((r) => r !== p)].slice(0, 6);
   localStorage.setItem('imaginecode.recents', JSON.stringify(S.recents));
   mirrorPrefs();
->>>>>>> df90e14 (Changes)
 }
 
 /* ─────────────── api ─────────────── */
@@ -168,10 +148,6 @@ function chipHTML(name) {
 }
 
 /* ═══════════════ MONACO ═══════════════ */
-<<<<<<< HEAD
-require.config({ paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs' } });
-require(['vs/editor/editor.main'], () => {
-=======
 
 // The desktop build serves Monaco from disk so the editor exists with no
 // internet; a plain checkout without the dependency falls back to the CDN.
@@ -203,7 +179,6 @@ async function bootMonaco() {
 }
 
 function startEditor() {
->>>>>>> df90e14 (Changes)
   monaco.languages.register({ id: 'imagine' });
   monaco.languages.setMonarchTokensProvider('imagine', {
     tokenizer: {
@@ -288,8 +263,6 @@ function startEditor() {
   document.fonts?.ready?.then(() => monaco.editor.remeasureFonts());
 
   init();
-<<<<<<< HEAD
-=======
 }
 
 bootMonaco().catch(async (err) => {
@@ -297,7 +270,6 @@ bootMonaco().catch(async (err) => {
   await init();
   TERM.line('t-err', '✗ the code editor could not be loaded — check your internet connection, or reinstall so Monaco is bundled locally.');
   showPanel(true);
->>>>>>> df90e14 (Changes)
 });
 
 function langFor(path) {
@@ -307,42 +279,24 @@ function langFor(path) {
 
 /* ═══════════════ INIT ═══════════════ */
 async function init() {
-<<<<<<< HEAD
-  loadLocal();
-=======
   await loadLocal();
->>>>>>> df90e14 (Changes)
   bindChrome();
   updateStatusChips();
   termBoot();
 
-<<<<<<< HEAD
-  const [status] = await Promise.all([api('/api/status').catch(() => null), refreshTree()]);
-  if (status) {
-    S.catalog = status.models || {};
-    if (status.connected) applyConnection(status);
-    if (!S.catalog[S.settings.model]) S.settings.model = status.defaultModel || 'claude-sonnet-5';
-  }
-=======
   const [status] = await Promise.all([api('/api/status').catch(() => null), refreshTree(), RULES.load()]);
   if (status) applyProviders(status);
->>>>>>> df90e14 (Changes)
   buildSettingsPage();
   updateStatusChips();
 
   openSpecial('welcome');
   const first = flatFiles().find((f) => f.path.endsWith('.imagine')) || flatFiles()[0];
-<<<<<<< HEAD
-  if (first) await openFile(first.path, { keepFocus: true });
-  activateTab(S.tabs.find((t) => t.kind === 'welcome')?.id);
-=======
   if (first && editor) await openFile(first.path, { keepFocus: true });
   activateTab(S.tabs.find((t) => t.kind === 'welcome')?.id);
 
   ONBOARDING.boot();
   // the introduction gets the first word; the rules recommendation follows it
   api('/api/prefs').then((prefs) => RULES.nudge(prefs)).catch(() => RULES.nudge(null));
->>>>>>> df90e14 (Changes)
 }
 
 function flatFiles(nodes = S.tree, acc = []) {
@@ -355,11 +309,7 @@ function flatFiles(nodes = S.tree, acc = []) {
 
 /* ═══════════════ TERMINAL ═══════════════ */
 const TERM = {
-<<<<<<< HEAD
-  el: null, para: null, think: null,
-=======
   el: null, para: null, think: null, codeEl: null,
->>>>>>> df90e14 (Changes)
   line(cls, html) {
     this.closeStream();
     const d = document.createElement('div');
@@ -373,10 +323,7 @@ const TERM = {
     const key = kind === 'think' ? 'think' : 'para';
     const other = kind === 'think' ? 'para' : 'think';
     this[other] = null;
-<<<<<<< HEAD
-=======
     this.codeEl = null;
->>>>>>> df90e14 (Changes)
     if (!this[key]) {
       const d = document.createElement('div');
       d.className = `t-line ${kind === 'think' ? 't-think' : 't-delta'}`;
@@ -386,11 +333,7 @@ const TERM = {
     this[key].textContent += text;
     this.scroll();
   },
-<<<<<<< HEAD
-  closeStream() { this.para = null; this.think = null; },
-=======
   closeStream() { this.para = null; this.think = null; this.codeEl = null; },
->>>>>>> df90e14 (Changes)
   clear() { this.el.innerHTML = ''; this.closeStream(); },
   scroll() {
     const near = this.el.scrollHeight - this.el.scrollTop - this.el.clientHeight < 90;
@@ -415,26 +358,13 @@ function loginHelp() {
   TERM.line('t-stage', '2 · in it, type  claude  and press Enter');
   TERM.line('t-stage', '3 · inside Claude, type  /login  — your browser opens, approve it');
   TERM.line('t-stage', '4 · come back here and press  ⚡ Connect Claude Code  again');
-<<<<<<< HEAD
-=======
   TERM.line('t-dim', 'no Claude Code at all? switch the compiler provider in Settings → Compiler Provider');
   TERM.line('t-dim', 'and paste an Anthropic, OpenAI or DeepSeek API key instead — no CLI, no login.');
->>>>>>> df90e14 (Changes)
   TERM.line('t-dim', 'using a third-party Claude provider instead? no /login needed — put its config in');
   TERM.line('t-dim', '~/.claude/settings.json under "env" (ANTHROPIC_BASE_URL + ANTHROPIC_API_KEY) — ImagineCode loads it automatically.');
   TERM.line('t-dim', '(this Imagine Terminal is just the build log — it can\'t run /login for you)');
 }
 
-<<<<<<< HEAD
-function reportConnectFailure(errText, quiet) {
-  const needsLogin = /not logged in|\/login/i.test(errText || '');
-  if (needsLogin) {
-    loginHelp();
-    if (!quiet) toast('err', 'One-time setup needed', 'Claude Code isn\'t logged in. Open Windows cmd → run "claude" → type /login. Exact steps are in the Imagine Terminal below.', 16000);
-  } else {
-    TERM.line('t-err', `✗ connection failed — ${esc(errText || 'unknown')}`);
-    if (!quiet) toast('err', 'Could not connect', errText || 'Is Claude Code installed and logged in?');
-=======
 function keyHelp(id, rejected) {
   const p = prov(id);
   const label = p?.label || 'This provider';
@@ -469,7 +399,6 @@ function reportConnectFailure(errText, quiet) {
   } else {
     TERM.line('t-err', `✗ connection failed — ${esc(txt || 'unknown')}`);
     if (!quiet) toast('err', 'Could not connect', txt || `Is ${providerLabel()} reachable?`);
->>>>>>> df90e14 (Changes)
   }
 }
 
@@ -681,19 +610,12 @@ async function openFile(path, { line, keepFocus } = {}) {
   else renderTabs();
 }
 
-<<<<<<< HEAD
-function openSpecial(kind) {
-  let tab = S.tabs.find((t) => t.kind === kind);
-  if (!tab) {
-    tab = { id: ++tabSeq, kind, name: kind === 'welcome' ? 'Welcome' : 'Settings' };
-=======
 const SPECIAL_TABS = { welcome: { name: 'Welcome', ico: '✦' }, settings: { name: 'Settings', ico: '⚙' }, rules: { name: 'Language Rules', ico: '§' } };
 
 function openSpecial(kind) {
   let tab = S.tabs.find((t) => t.kind === kind);
   if (!tab) {
     tab = { id: ++tabSeq, kind, name: SPECIAL_TABS[kind]?.name || kind };
->>>>>>> df90e14 (Changes)
     S.tabs.push(tab);
   }
   activateTab(tab.id);
@@ -711,10 +633,7 @@ function activateTab(id, { line } = {}) {
   $('#monaco-host').classList.toggle('hidden-under', !isFile);
   $('#welcome').classList.toggle('active', tab?.kind === 'welcome');
   $('#settings-page').classList.toggle('active', tab?.kind === 'settings');
-<<<<<<< HEAD
-=======
   $('#rules-page').classList.toggle('active', tab?.kind === 'rules');
->>>>>>> df90e14 (Changes)
   $('#empty-editor').classList.toggle('active', !tab);
 
   if (isFile) {
@@ -747,9 +666,6 @@ function closeTab(id, { force } = {}) {
   } else renderTabs();
 }
 
-<<<<<<< HEAD
-function renderTabs() {
-=======
 // the desktop shell mirrors this to decide whether closing needs a warning
 let lastDirtyReport = -1;
 function reportDirty() {
@@ -763,17 +679,12 @@ function reportDirty() {
 
 function renderTabs() {
   reportDirty();
->>>>>>> df90e14 (Changes)
   const host = $('#tabbar');
   host.innerHTML = '';
   for (const t of S.tabs) {
     const el = document.createElement('div');
     el.className = 'tab' + (t.id === S.active ? ' active' : '') + (t.kind === 'file' && S.dirty.has(t.path) ? ' dirty' : '');
-<<<<<<< HEAD
-    const icon = t.kind === 'file' ? chipHTML(t.name) : `<span class="tab-ico">${t.kind === 'welcome' ? '✦' : '⚙'}</span>`;
-=======
     const icon = t.kind === 'file' ? chipHTML(t.name) : `<span class="tab-ico">${SPECIAL_TABS[t.kind]?.ico || '✦'}</span>`;
->>>>>>> df90e14 (Changes)
     el.innerHTML = `${icon}<span class="tab-label">${esc(t.name)}</span><span class="tab-close" title="Close"><span class="x">✕</span></span>`;
     el.onclick = () => activateTab(t.id);
     el.onauxclick = (e) => { if (e.button === 1) { e.preventDefault(); closeTab(t.id); } };
@@ -811,10 +722,6 @@ function saveActive() {
   const tab = S.tabs.find((t) => t.id === S.active);
   if (tab?.kind === 'file') saveFile(tab.path).then(() => flashStatus(`✦ saved ${tab.name}`));
   if (tab?.kind === 'settings') flashStatus('✦ settings save themselves here');
-<<<<<<< HEAD
-}
-async function saveAll() { for (const p of [...S.dirty]) await saveFile(p); }
-=======
   if (tab?.kind === 'rules') RULES.save().then((ok) => ok && flashStatus('✦ language rules saved'));
 }
 async function saveAll() {
@@ -823,7 +730,6 @@ async function saveAll() {
   // and so must the desktop shell's save-before-close
   if (RULES.isDirty()) await RULES.save({ quiet: true });
 }
->>>>>>> df90e14 (Changes)
 
 function flashStatus(text, ms = 2400) {
   const el = $('#sb-build');
@@ -834,26 +740,6 @@ function flashStatus(text, ms = 2400) {
 }
 
 /* ═══════════════ CONNECT ═══════════════ */
-<<<<<<< HEAD
-function applyConnection(c) {
-  S.connection = c;
-  const sb = $('#sb-claude');
-  const ab = $('#ab-claude');
-  sb.classList.remove('connecting');
-  if (c.connected) {
-    document.getElementById('statusbar').classList.add('connected');
-    sb.innerHTML = `<span class="sb-zap">⚡</span> Claude Code`;
-    sb.title = `${c.version || 'connected'} · ${c.method || ''} · click to re-check`;
-    ab.classList.add('connected');
-    ab.title = `Claude Code connected — ${c.version || ''}`;
-  } else {
-    document.getElementById('statusbar').classList.remove('connected');
-    sb.innerHTML = `<span class="sb-zap">⚡</span> Connect Claude Code`;
-    sb.title = c.error || 'Click to connect';
-    ab.classList.remove('connected');
-  }
-  ab.querySelector('.ab-dot')?.classList.toggle('connected', !!c.connected);
-=======
 // the whole provider table, straight from the server (keys arrive masked)
 function applyProviders(payload) {
   const next = payload?.providers;
@@ -922,25 +808,11 @@ function updateConnChip() {
   const wc = $('#w-connect');
   if (wc) wc.innerHTML = `<span class="wl-ico">⚡</span> ${esc(lit ? `${label} connected ✓ — re-check` : text)}`;
   updateStatusChips();
->>>>>>> df90e14 (Changes)
 }
 
 let connecting = null;
 async function connect({ quiet } = {}) {
   if (connecting) return connecting;
-<<<<<<< HEAD
-  const sb = $('#sb-claude');
-  sb.classList.add('connecting');
-  sb.innerHTML = `<span class="sb-zap">⚡</span> Connecting…`;
-  TERM.line('t-stage', 'connecting to Claude Code…');
-  connecting = (async () => {
-    try {
-      const c = await api('/api/connect', jsonBody({ model: S.settings.model }));
-      applyConnection(c);
-      if (c.connected) {
-        TERM.line('t-ok', `⚡ Claude Code connected · ${esc(c.version || '')} · ${esc(c.method || '')} · ${((c.latencyMs || 0) / 1000).toFixed(1)}s`);
-        if (!quiet) toast('ok', 'Claude Code connected', `${c.version || 'ready'} — via ${c.method || 'local login'}. Your imagination now has a compiler.`);
-=======
   const id = S.settings.provider;
   const p = prov(id);
   // no key at all: connecting can't succeed — send them to the one place that fixes it
@@ -964,17 +836,12 @@ async function connect({ quiet } = {}) {
         if (c.warning) TERM.line('t-dim', `  ${esc(c.warning)}`);
         if (!quiet) toast('ok', `${providerLabel(id)} connected`, `${c.version || 'ready'} — via ${c.method || 'local login'}. Your imagination now has a compiler.`);
         if (S.tabs.find((t) => t.id === S.active)?.kind === 'settings') buildSettingsPage();
->>>>>>> df90e14 (Changes)
       } else {
         reportConnectFailure(c.error, quiet);
       }
       return c.connected;
     } catch (err) {
-<<<<<<< HEAD
-      applyConnection({ connected: false, error: err.message });
-=======
       applyConnection({ provider: id, connected: false, error: err.message });
->>>>>>> df90e14 (Changes)
       reportConnectFailure(err.message, quiet);
       return false;
     } finally { connecting = null; }
@@ -988,11 +855,7 @@ async function run(opts = {}) {
   if (!flatFiles().length) return toast('info', 'Nothing to compile', 'Create a file and imagine something first.');
 
   showPanel(true);
-<<<<<<< HEAD
-  if (!S.connection.connected) {
-=======
   if (!providerReady()) {
->>>>>>> df90e14 (Changes)
     const ok = await connect({ quiet: false });
     if (!ok) return;
   }
@@ -1015,22 +878,14 @@ async function run(opts = {}) {
 
   setBuilding(true);
   TERM.line('t-dim', '');
-<<<<<<< HEAD
-  TERM.cmd(`run ${entry} --${S.settings.format}${opts.fresh ? ' --fresh' : ''}`);
-=======
   TERM.cmd(`run ${entry} --${S.settings.format} --via ${S.settings.provider}${RULES.isActive() ? ` --spec ${RULES.ruleCount()}` : ''}${opts.fresh ? ' --fresh' : ''}`);
->>>>>>> df90e14 (Changes)
 
   try {
     const res = await fetch('/api/render', jsonBody({
       entry,
       format: S.settings.format,
-<<<<<<< HEAD
-      model: S.settings.model,
-=======
       provider: S.settings.provider,
       model: curModel(),
->>>>>>> df90e14 (Changes)
       instructions: S.settings.notes,
       fresh: !!opts.fresh,
     }));
@@ -1062,8 +917,6 @@ function handleBuildMsg(m) {
     case 'stage': TERM.line('t-stage', esc(m.text)); break;
     case 'delta': TERM.stream('delta', m.text); break;
     case 'think': TERM.stream('think', m.text); break;
-<<<<<<< HEAD
-=======
     // direct-API providers stream the whole page back as text — showing 60 KB of
     // markup would drown the log, so the fenced part arrives as a byte counter
     case 'code': {
@@ -1073,7 +926,6 @@ function handleBuildMsg(m) {
       TERM.scroll();
       break;
     }
->>>>>>> df90e14 (Changes)
     case 'tool': TERM.line('t-tool', `✎ ${esc(m.name)}${m.file ? ' → ' + esc(m.file) : ''}`); break;
     case 'summary':
       // the streamed deltas were a live preview of this same message — replace, don't duplicate
@@ -1082,12 +934,8 @@ function handleBuildMsg(m) {
       break;
     case 'done': {
       const cost = m.costUsd == null ? '' : m.costUsd < 0.005 ? ' · <1¢' : ` · ~$${m.costUsd.toFixed(3)}`;
-<<<<<<< HEAD
-      TERM.line('t-ok', `✓ imagination compiled in ${m.seconds}s${cost}`);
-=======
       const tok = m.tokens ? ` · ${fmtTok(m.tokens.in)} in / ${fmtTok(m.tokens.out)} out` : '';
       TERM.line('t-ok', `✓ imagination compiled in ${m.seconds}s${cost}${tok}`);
->>>>>>> df90e14 (Changes)
       TERM.line('t-dim', `  serving at ${location.origin}/preview/`);
       setBuilding(false);
       $('#sb-build').textContent = `✓ built in ${m.seconds}s`;
@@ -1100,28 +948,19 @@ function handleBuildMsg(m) {
       setBuilding(false);
       $('#sb-build').textContent = '✦ ready';
       if (/not logged in|\/login/i.test(m.message || '')) {
-<<<<<<< HEAD
-        applyConnection({ connected: false, error: m.message });
-        loginHelp();
-        toast('err', 'One-time setup needed', 'Claude Code isn\'t logged in — steps are in the Imagine Terminal below.', 16000);
-=======
         applyConnection({ provider: 'claude-code', connected: false, error: m.message });
         loginHelp();
         toast('err', 'One-time setup needed', 'Claude Code isn\'t logged in — steps are in the Imagine Terminal below.', 16000);
       } else if (/no .* key yet|api key|401|invalid.*key|unauthor/i.test(m.message || '') && S.settings.provider !== 'claude-code') {
         keyHelp(S.settings.provider);
         toast('err', `${providerLabel()} rejected the build`, 'Check the key in Settings → Compiler Provider.', 14000);
->>>>>>> df90e14 (Changes)
       } else {
         toast('err', 'Build failed', m.message);
       }
       break;
   }
 }
-<<<<<<< HEAD
-=======
 const fmtTok = (n) => (n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n ?? 0));
->>>>>>> df90e14 (Changes)
 
 function setBuilding(on) {
   S.building = on;
@@ -1161,14 +1000,6 @@ function showPanel(show) {
 }
 function togglePanel() { showPanel($('#panel').classList.contains('hidden')); }
 
-<<<<<<< HEAD
-/* ═══════════════ SETTINGS PAGE ═══════════════ */
-const MODEL_META = {
-  'claude-sonnet-5': { badge: 'default · medium reasoning', desc: 'balanced + quick — the imagination workhorse' },
-  'claude-opus-4-8': { badge: 'low reasoning', desc: 'deepest interpretation, for intricate dreams' },
-  'claude-haiku-4-5': { badge: 'fast', desc: 'instant sketches, lightest touch' },
-};
-=======
 /* ═══════════════ LANGUAGE RULES ═══════════════ */
 //
 // The dreamer's spec for the language they invented. The server owns both the
@@ -1780,32 +1611,14 @@ const RULES = (() => {
 window.RULES = RULES;
 
 /* ═══════════════ SETTINGS PAGE ═══════════════ */
->>>>>>> df90e14 (Changes)
 function buildSettingsPage() {
   $$('input[name="fmt"]').forEach((r) => {
     r.checked = r.value === S.settings.format;
     r.onchange = () => { S.settings.format = r.value; saveSettings(); };
   });
-<<<<<<< HEAD
-  const host = $('#model-list');
-  host.innerHTML = '';
-  const ids = Object.keys(S.catalog).length ? Object.keys(S.catalog) : Object.keys(MODEL_META);
-  for (const id of ids) {
-    const meta = MODEL_META[id] || { badge: '', desc: '' };
-    const label = S.catalog[id]?.label || id;
-    const row = document.createElement('div');
-    row.className = 'model-row' + (S.settings.model === id ? ' checked' : '');
-    row.innerHTML = `<span class="model-radio"></span><span class="model-name">${esc(label)}</span>
-      ${meta.badge ? `<span class="model-badge">${esc(meta.badge)}</span>` : ''}
-      <span class="model-desc">${esc(meta.desc)}</span>`;
-    row.onclick = () => { S.settings.model = id; saveSettings(); buildSettingsPage(); };
-    host.appendChild(row);
-  }
-=======
   buildProviderList();
   buildModelList();
 
->>>>>>> df90e14 (Changes)
   const notes = $('#set-notes');
   notes.value = S.settings.notes || '';
   notes.oninput = () => { S.settings.notes = notes.value; saveSettings(); };
@@ -1818,15 +1631,6 @@ function buildSettingsPage() {
     sel.onchange = () => { S.settings.entry = sel.value; saveSettings(); renderTree(); };
   }
 }
-<<<<<<< HEAD
-function updateStatusChips() {
-  $('#sb-format').innerHTML = S.settings.format === 'react' ? '⚛ React' : '&lt;/&gt; HTML';
-  const label = S.catalog[S.settings.model]?.label || S.settings.model.replace('claude-', '');
-  const eff = S.settings.model === 'claude-sonnet-5' ? ' · medium' : S.settings.model === 'claude-opus-4-8' ? ' · low' : '';
-  $('#sb-model').textContent = `✦ ${label}${eff}`;
-  const entryEl = $('#sb-entry');
-  if (entryEl) entryEl.textContent = `▶ entry: ${S.settings.entry ? S.settings.entry.split('/').pop() : 'choose…'}`;
-=======
 
 function providerState(p) {
   if (p.connection?.connected) return { cls: 'ok', text: `connected · ${p.connection.version || 'ready'}` };
@@ -1967,7 +1771,6 @@ function updateStatusChips() {
   const entryEl = $('#sb-entry');
   if (entryEl) entryEl.textContent = `▶ entry: ${S.settings.entry ? S.settings.entry.split('/').pop() : 'choose…'}`;
   RULES.paintChips();
->>>>>>> df90e14 (Changes)
 }
 
 /* ═══════════════ WELCOME ═══════════════ */
@@ -2017,15 +1820,11 @@ const COMMANDS = [
   { id: 'run', label: 'Imagine: Run Imagination', keys: 'Ctrl+Enter', ico: '▶', run: () => run() },
   { id: 'rebuild', label: 'Imagine: Rebuild from Scratch', ico: '⟲', run: () => run({ fresh: true }) },
   { id: 'stop', label: 'Imagine: Stop Build', keys: 'Shift+F5', ico: '■', run: () => stopBuild() },
-<<<<<<< HEAD
-  { id: 'connect', label: 'Imagine: Connect Claude Code', ico: '⚡', run: () => connect() },
-=======
   { id: 'connect', label: 'Imagine: Connect Compiler Provider', ico: '⚡', run: () => connect() },
   { id: 'rules', label: 'Language: Edit Language Rules', keys: 'Ctrl+Shift+L', ico: '§', run: () => RULES.open() },
   { id: 'rules-infer', label: 'Language: Propose Rules From My Files', ico: '✦', run: () => { RULES.open(); $('#rules-infer')?.click(); } },
   { id: 'rules-save', label: 'Language: Save Language Rules', ico: '✓', run: () => RULES.save() },
   { id: 'keys', label: 'Settings: Compiler Provider & API Keys', ico: '🔑', run: () => openSpecial('settings') },
->>>>>>> df90e14 (Changes)
   { id: 'newfile', label: 'File: New Imagination File', ico: '✦', run: () => newFileFlow() },
   { id: 'newfolder', label: 'File: New Folder', ico: '▸', run: () => newFolderFlow() },
   { id: 'save', label: 'File: Save', keys: 'Ctrl+S', ico: '✓', run: () => saveActive() },
@@ -2034,10 +1833,7 @@ const COMMANDS = [
   { id: 'fmt-react', label: 'Settings: Output Format → React', ico: '⚛', run: () => { S.settings.format = 'react'; saveSettings(); buildSettingsPage(); } },
   { id: 'settings', label: 'View: Open Settings', ico: '⚙', run: () => openSpecial('settings') },
   { id: 'welcome', label: 'View: Welcome', ico: '✦', run: () => openSpecial('welcome') },
-<<<<<<< HEAD
-=======
   { id: 'intro', label: 'Help: Show Introduction', ico: '✦', run: () => ONBOARDING.open() },
->>>>>>> df90e14 (Changes)
   { id: 'panel', label: 'View: Toggle Imagine Terminal', keys: 'Ctrl+`', ico: '❯', run: () => togglePanel() },
   { id: 'preview', label: 'View: Toggle Preview', ico: '◫', run: () => togglePreview() },
   { id: 'sidebar', label: 'View: Toggle Sidebar', keys: 'Ctrl+B', ico: '◧', run: () => $('#sidebar').classList.toggle('collapsed') },
@@ -2046,8 +1842,6 @@ const COMMANDS = [
   { id: 'search', label: 'Search: Find in Imagination', ico: '🔍', run: () => switchSideView('search') },
 ];
 
-<<<<<<< HEAD
-=======
 // provider + model entries depend on what the server reports, so they're built fresh
 function allCommands() {
   const dyn = [];
@@ -2070,7 +1864,6 @@ function allCommands() {
   return COMMANDS.concat(dyn);
 }
 
->>>>>>> df90e14 (Changes)
 const palette = { open: false, mode: '>', items: [], sel: 0, onPick: null };
 function openPalette(prefix) {
   palette.open = true;
@@ -2103,11 +1896,7 @@ function renderPalette() {
   const needle = (isCmd ? q.slice(1) : q).trim().toLowerCase();
   let items;
   if (isCmd) {
-<<<<<<< HEAD
-    items = COMMANDS.filter((c) => c.label.toLowerCase().includes(needle))
-=======
     items = allCommands().filter((c) => c.label.toLowerCase().includes(needle))
->>>>>>> df90e14 (Changes)
       .map((c) => ({ ico: c.ico, label: c.label, keys: c.keys, run: c.run }));
   } else {
     items = flatFiles().filter((f) => f.path.toLowerCase().includes(needle))
@@ -2146,11 +1935,8 @@ const MENUS = {
     { label: 'New Imagination File', keys: 'from Explorer', run: newFileFlow },
     { label: 'New Folder', run: newFolderFlow },
     'sep',
-<<<<<<< HEAD
-=======
     { label: 'Language Rules…', keys: 'Ctrl+Shift+L', run: () => RULES.open() },
     'sep',
->>>>>>> df90e14 (Changes)
     { label: 'Save', keys: 'Ctrl+S', run: () => saveActive() },
     { label: 'Save All', run: () => saveAll().then(() => flashStatus('✦ all saved')) },
     'sep',
@@ -2170,10 +1956,7 @@ const MENUS = {
     { label: 'Quick Open File…', keys: 'Ctrl+P', run: () => openPalette('') },
     'sep',
     { label: 'Welcome', run: () => openSpecial('welcome') },
-<<<<<<< HEAD
-=======
     { label: 'Language Rules', keys: 'Ctrl+Shift+L', run: () => RULES.open() },
->>>>>>> df90e14 (Changes)
     { label: 'Settings', run: () => openSpecial('settings') },
     'sep',
     { label: 'Toggle Sidebar', keys: 'Ctrl+B', run: () => $('#sidebar').classList.toggle('collapsed') },
@@ -2185,14 +1968,6 @@ const MENUS = {
     { label: '⟲ Rebuild from Scratch', run: () => run({ fresh: true }) },
     { label: '■ Stop Build', keys: 'Shift+F5', run: () => stopBuild() },
     'sep',
-<<<<<<< HEAD
-    { label: 'Open Preview in Browser', run: () => window.open('/preview/', '_blank') },
-    { label: 'Connect Claude Code', run: () => connect() },
-  ],
-  help: [
-    { label: 'Welcome', run: () => openSpecial('welcome') },
-    { label: 'About ImagineCode', run: () => toast('info', 'ImagineCode v1.0', 'The IDE for programming languages that don\'t exist yet. Imagination in, websites out — compiled by Claude Code. ✦') },
-=======
     { label: '§ Language Rules…', keys: 'Ctrl+Shift+L', run: () => RULES.open() },
     { label: 'Open Preview in Browser', run: () => window.open('/preview/', '_blank') },
     { label: 'Connect Compiler Provider', keys: '⚡', run: () => connect() },
@@ -2204,7 +1979,6 @@ const MENUS = {
     { label: 'Welcome', run: () => openSpecial('welcome') },
     'sep',
     { label: 'About ImagineCode', run: () => toast('info', `ImagineCode${ENV.version ? ' v' + ENV.version : ''}`, 'The IDE for programming languages that don\'t exist yet. Imagination in, websites out — compiled by Claude Code, or by your own Anthropic, OpenAI or DeepSeek key. ✦') },
->>>>>>> df90e14 (Changes)
   ],
 };
 
@@ -2259,8 +2033,6 @@ function toast(kind, title, msg, ms = 6000) {
   if (ms) setTimeout(() => el.remove(), ms);
 }
 
-<<<<<<< HEAD
-=======
 // A recommendation the user can act on in one click. Deliberately sticky: it is
 // shown once in the app's life, so timing it out would mean losing it for good.
 function toastAction(title, msg, actionLabel, onAction) {
@@ -2279,16 +2051,12 @@ function toastAction(title, msg, actionLabel, onAction) {
   host.appendChild(el);
 }
 
->>>>>>> df90e14 (Changes)
 /* ═══════════════ CHROME BINDING ═══════════════ */
 function bindChrome() {
   // icons
   $('.ab-item[data-view="explorer"]').innerHTML = I.files;
   $('.ab-item[data-view="search"]').innerHTML = I.search;
-<<<<<<< HEAD
-=======
   $('#ab-rules').innerHTML = I.rules;
->>>>>>> df90e14 (Changes)
   $('.ab-item[data-view="run-view"]').innerHTML = I.play;
   $('#ab-claude').innerHTML = I.zap + '<span class="ab-dot"></span>';
   $('#ab-settings').innerHTML = I.gear;
@@ -2352,26 +2120,18 @@ function bindChrome() {
 
   // welcome
   $('#w-connect').onclick = () => connect();
-<<<<<<< HEAD
-  $('#w-new').onclick = newFileFlow;
-  $('#w-run').onclick = () => run();
-=======
   $('#w-keys').onclick = () => openSpecial('settings');
   $('#w-new').onclick = newFileFlow;
   $('#w-run').onclick = () => run();
   $('#w-intro').onclick = () => ONBOARDING.open();
 
   bindDesktop();
->>>>>>> df90e14 (Changes)
 
   // status bar
   $('#sb-claude').onclick = () => connect();
   $('#sb-format').onclick = () => openSpecial('settings');
   $('#sb-model').onclick = () => openSpecial('settings');
-<<<<<<< HEAD
-=======
   $('#sb-provider').onclick = () => openSpecial('settings');
->>>>>>> df90e14 (Changes)
   $('#sb-entry').onclick = async () => {
     const p = await pickEntry();
     if (p) {
@@ -2409,10 +2169,6 @@ function bindChrome() {
 
   // keybindings
   window.addEventListener('keydown', (e) => {
-<<<<<<< HEAD
-    const mod = e.ctrlKey || e.metaKey;
-    if (mod && e.shiftKey && e.code === 'KeyP') { e.preventDefault(); openPalette('>'); return; }
-=======
     // The introduction owns the keyboard while it is up — this listener is
     // registered first, so without this line Ctrl+Enter during the tutorial
     // would quietly kick off a build behind the overlay.
@@ -2420,7 +2176,6 @@ function bindChrome() {
     const mod = e.ctrlKey || e.metaKey;
     if (mod && e.shiftKey && e.code === 'KeyP') { e.preventDefault(); openPalette('>'); return; }
     if (mod && e.shiftKey && e.code === 'KeyL') { e.preventDefault(); RULES.open(); return; }
->>>>>>> df90e14 (Changes)
     if (e.key === 'F1') { e.preventDefault(); openPalette('>'); return; }
     if (mod && !e.shiftKey && e.code === 'KeyP') { e.preventDefault(); openPalette(''); return; }
     if (mod && e.code === 'KeyS') { e.preventDefault(); saveActive(); return; }
@@ -2433,11 +2188,6 @@ function bindChrome() {
     if (e.key === 'Escape') { hideCtx(); hideMenus(); if (palette.open) closePalette(); }
   }, true);
 
-<<<<<<< HEAD
-  window.addEventListener('beforeunload', (e) => {
-    if (S.dirty.size) { e.preventDefault(); e.returnValue = ''; }
-  });
-=======
   // In the desktop shell the close guard is a native dialog driven from main —
   // beforeunload there would cancel the close with no explanation at all.
   if (!window.imagine) {
@@ -2445,14 +2195,11 @@ function bindChrome() {
       if (S.dirty.size || RULES.isDirty()) { e.preventDefault(); e.returnValue = ''; }
     });
   }
->>>>>>> df90e14 (Changes)
 
   bindSearch();
   bindResizers();
 }
 
-<<<<<<< HEAD
-=======
 /* ═══════════════ DESKTOP SHELL ═══════════════ */
 // Everything in here is a no-op in a plain browser tab: window.imagine only
 // exists when the page is being served into the Electron window.
@@ -2486,7 +2233,6 @@ function bindDesktop() {
   $('#titlebar').ondblclick = (e) => { if (!e.target.closest('button, .menu, #winctl')) D.toggleMaximize(); };
 }
 
->>>>>>> df90e14 (Changes)
 /* ═══════════════ RESIZERS ═══════════════ */
 function bindResizers() {
   const drag = (el, onMove) => {

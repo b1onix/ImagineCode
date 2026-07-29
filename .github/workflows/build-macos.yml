@@ -1,0 +1,83 @@
+name: Build macOS
+
+# A .dmg can only be assembled on macOS — electron-builder refuses on
+# Windows and Linux because the format is made with hdiutil. So the disk
+# image is built here, on GitHub's own Macs.
+#
+#   Actions ▸ Build macOS ▸ Run workflow      → artifacts on the run page
+#   git tag v1.0.0 && git push --tags         → attached to the release
+#
+# One job per architecture, each on a runner of that architecture. That is
+# not cosmetic: the Agent SDK ships its Claude Code CLI as a per-platform
+# native binary (@anthropic-ai/claude-agent-sdk-darwin-arm64 / -darwin-x64),
+# and npm only installs the one matching the machine it runs on. Cross-
+# building both slices from one runner would bundle the wrong CLI into one
+# of the two disk images, and it would fail at the first Run.
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write        # needed only by the release step on tag pushes
+
+jobs:
+  dmg:
+    name: ${{ matrix.label }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false   # an Intel failure shouldn't bin a good arm64 build
+      matrix:
+        include:
+          - os: macos-14
+            arch: arm64
+            label: Apple silicon (arm64)
+          - os: macos-13
+            arch: x64
+            label: Intel (x64)
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      # `npm run icons` is skipped on purpose — it rasterises the SVG through a
+      # real Chromium window, which a headless runner can't be relied on to
+      # provide. build/icon.icns is committed for exactly this reason.
+      - name: Build .dmg and .zip
+        run: npx electron-builder --mac dmg zip --${{ matrix.arch }} --publish never
+        env:
+          # unsigned build: no Apple Developer certificate in this repo, so
+          # stop electron-builder hunting the keychain for one
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+
+      - name: Checksums
+        run: |
+          cd dist
+          shasum -a 256 *.dmg *.zip | tee SHA256SUMS-${{ matrix.arch }}.txt
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ImagineCode-macos-${{ matrix.arch }}
+          path: |
+            dist/*.dmg
+            dist/*.zip
+            dist/SHA256SUMS-*.txt
+          if-no-files-found: error
+
+      - name: Attach to release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/*.dmg
+            dist/*.zip
+            dist/SHA256SUMS-*.txt

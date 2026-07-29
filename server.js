@@ -8,16 +8,6 @@ import { spawn } from 'child_process';
 import { query } from '@anthropic-ai/claude-agent-sdk';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-<<<<<<< HEAD
-const WORKSPACE = path.join(__dirname, 'workspace');
-const OUTPUT = path.join(__dirname, 'output');
-const PUBLIC = path.join(__dirname, 'public');
-
-const MODELS = {
-  'claude-sonnet-5':  { label: 'Sonnet 5',  effortDefault: 'medium', supportsEffort: true },
-  'claude-opus-4-8':  { label: 'Opus 4.8',  effortDefault: 'low',    supportsEffort: true },
-  'claude-haiku-4-5': { label: 'Haiku 4.5', effortDefault: null,     supportsEffort: false },
-=======
 
 // ---------------------------------------------------------------- locations
 //
@@ -64,21 +54,10 @@ const MODELS = {
   'claude-sonnet-5':  { label: 'Sonnet 5',  badge: 'default · medium reasoning', desc: 'balanced + quick — the imagination workhorse', effortDefault: 'medium', supportsEffort: true },
   'claude-opus-4-8':  { label: 'Opus 4.8',  badge: 'low reasoning',              desc: 'deepest interpretation, for intricate dreams',  effortDefault: 'low',    supportsEffort: true },
   'claude-haiku-4-5': { label: 'Haiku 4.5', badge: 'fast',                       desc: 'instant sketches, lightest touch',              effortDefault: null,     supportsEffort: false },
->>>>>>> df90e14 (Changes)
 };
 const DEFAULT_MODEL = 'claude-sonnet-5';
 const HANDSHAKE_MODEL = 'claude-haiku-4-5';
 
-<<<<<<< HEAD
-const app = express();
-app.use(express.json({ limit: '5mb' }));
-
-const state = {
-  connection: { connected: false, checkedAt: null, version: null, method: null, error: null },
-  render: null, // { controller, res, startedAt }
-  lastBuild: null, // { at, format, model, seconds, costUsd }
-};
-=======
 const ANTHROPIC_VERSION = '2023-06-01';
 
 // thinking: 'adaptive' → send thinking:{type:'adaptive'} (Claude 4.6+ only).
@@ -206,16 +185,12 @@ const state = {
   lastBuild: null, // { at, format, model, provider, seconds, costUsd }
 };
 const conn = (id) => (state.connections[id] ??= { connected: false, checkedAt: null, error: null });
->>>>>>> df90e14 (Changes)
 
 // ---------------------------------------------------------------- helpers
 
 function safeJoin(root, rel) {
   const clean = String(rel || '').replace(/\\/g, '/').replace(/^\/+/, '');
   const abs = path.resolve(root, clean);
-<<<<<<< HEAD
-  if (abs !== root && !abs.startsWith(root + path.sep)) {
-=======
   // The root itself is never a legitimate target — every caller wants a file or
   // a folder *inside* the workspace. Letting it through would make
   // `DELETE /api/file?path=` a recursive delete of everything the dreamer owns.
@@ -225,7 +200,6 @@ function safeJoin(root, rel) {
     throw err;
   }
   if (!abs.startsWith(root + path.sep)) {
->>>>>>> df90e14 (Changes)
     const err = new Error('Path escapes workspace');
     err.status = 400;
     throw err;
@@ -276,14 +250,10 @@ function claudeVersion() {
     let done = false;
     const finish = (v) => { if (!done) { done = true; resolve(v); } };
     try {
-<<<<<<< HEAD
-      const p = spawn('claude', ['--version'], { shell: true, windowsHide: true });
-=======
       // the bundled binary when packaged, whatever is on PATH otherwise
       const p = CLAUDE_BIN
         ? spawn(CLAUDE_BIN, ['--version'], { windowsHide: true })
         : spawn('claude', ['--version'], { shell: true, windowsHide: true });
->>>>>>> df90e14 (Changes)
       let buf = '';
       p.stdout.on('data', (d) => (buf += d));
       p.on('close', () => finish(buf.trim() || null));
@@ -331,20 +301,15 @@ function sdkEnv() {
   const env = {};
   for (const [k, v] of Object.entries(process.env)) {
     if (nested && /^(CLAUDECODE$|CLAUDE_CODE_|CLAUDE_AGENT_|CLAUDE_PID$|CLAUDE_EFFORT$|AI_AGENT$|BAGGAGE$|ANTHROPIC_BASE_URL$|ANTHROPIC_DEFAULT_)/.test(k)) continue;
-<<<<<<< HEAD
-=======
     // in the desktop build this process is Electron wearing a Node costume;
     // the costume must not be handed down to the compiler's own child process
     if (/^(ELECTRON_RUN_AS_NODE$|ELECTRON_|NODE_OPTIONS$)/.test(k)) continue;
->>>>>>> df90e14 (Changes)
     env[k] = v;
   }
   Object.assign(env, userSettingsEnv());
   return env;
 }
 
-<<<<<<< HEAD
-=======
 // ---------------------------------------------------------------- api keys
 //
 // Keys live in a gitignored file next to server.js, never in the browser.
@@ -678,7 +643,6 @@ function rulesPayload(rules = readRules()) {
   };
 }
 
->>>>>>> df90e14 (Changes)
 // ---------------------------------------------------------------- compiler prompt
 
 const COMPILER_SYSTEM = `You are the ImagineCode Compiler — the compiler for programming languages that don't exist yet.
@@ -701,9 +665,6 @@ LAW 2 — COMPILE WHAT IS WRITTEN. ONLY WHAT IS WRITTEN. (the fidelity law)
 LAW 3 — SOURCE SCOPE:
 - Compile the ENTRY file. Other workspace files are modules: include one ONLY if the entry file references it by name. Unreferenced files do not exist for this build — never merge them in.
 
-<<<<<<< HEAD
-HOW TO READ THE LANGUAGE:
-=======
 LAW 4 — THE DREAMER'S SPEC IS THE SPEC (the authority law):
 - When the prompt contains a section marked THE LANGUAGE SPEC, it was written by the person who invented this language, and it is the authoritative definition of it. Read it before the source.
 - Anything it defines is settled: its meaning for a symbol, keyword, block or construct overrides the general reading heuristics below, and overrides any interpretation you find more natural. If the spec says \`~>\` means "fades in over two seconds", it does not mean "flows into", however much it looks like it.
@@ -712,7 +673,6 @@ LAW 4 — THE DREAMER'S SPEC IS THE SPEC (the authority law):
 - Where the spec is silent, fall back to the heuristics below. Where it speaks, it wins. Never contradict it, never argue with it, and never mention it in your build log.
 
 HOW TO READ THE LANGUAGE (defaults — any of these yields to the dreamer's spec):
->>>>>>> df90e14 (Changes)
 - Indentation, nesting and blocks = structure and hierarchy.
 - "quoted text" = literal copy for the screen — reproduce exactly, including emoji.
 - [square brackets] = interactive elements the source declares.
@@ -730,22 +690,12 @@ INCREMENTAL BUILDS:
 - When the prompt is marked INCREMENTAL, the compiled site already exists. Read index.html first, then apply the smallest possible changes with the Edit tool so the file reflects exactly the source changes — and only the changes. Never regenerate from scratch. Everything the diff does not require must remain untouched, so the site stays consistent build to build.
 
 PROCESS:
-<<<<<<< HEAD
-1. Read the source below.
-=======
 1. Read the language spec, if one is given. Then read the source below.
->>>>>>> df90e14 (Changes)
 2. Write (fresh build) or Edit (incremental build) index.html in the current working directory. Touch no other files.
 3. MANDATORY SELF-AUDIT before finishing — Read the index.html you produced and check every piece of visible content:
    (a) every visible string traces to a quoted string or written word in the source;
    (b) no identifier name (MyHeader, button1, …) appears as visible text;
    (c) no invented copy anywhere — declared-but-textless elements are empty;
-<<<<<<< HEAD
-   (d) nothing exists that the source didn't declare.
-   Fix any violation with the Edit tool before you finish. Do not skip this step.
-4. Your final message: one or two short plain-text sentences for the build log, stating only facts about this build. Describe what you built or changed — NEVER list excluded, unreferenced or unchanged files. Mention only file names that actually appear in the source section above. No markdown, no code fences.`;
-
-=======
    (d) nothing exists that the source didn't declare;
    (e) every construct the dreamer's spec defines behaves the way the spec says, not the way it merely looks like it should.
    Fix any violation with the Edit tool before you finish. Do not skip this step.
@@ -767,16 +717,12 @@ Instead, RETURN the finished file:
 - On an INCREMENTAL build the current index.html is given to you. Return the FULL updated file with the smallest possible changes applied; everything the source diff does not require must come back byte-for-byte identical.
 - Run the mandatory self-audit against the file you are about to emit (every visible string traces to the source; no identifier names on screen; no invented copy; nothing undeclared; every construct the dreamer's spec defines behaves as the spec says) and fix violations before you emit it.`;
 
->>>>>>> df90e14 (Changes)
 function targetLine(format) {
   return format === 'react'
     ? 'React — one self-contained index.html using React 18 UMD + ReactDOM UMD + Babel Standalone from CDN, app written as React function components with hooks in <script type="text/babel">.'
     : 'HTML — one self-contained index.html with inline <style> and <script>.';
 }
 
-<<<<<<< HEAD
-function buildRenderPrompt({ files, entryPath, format, instructions }) {
-=======
 // The spec goes AHEAD of the source in both prompt builders: the compiler should
 // know what the language means before it meets a line of it, not reinterpret
 // what it has already read.
@@ -785,7 +731,6 @@ function specParts(compiled) {
 }
 
 function buildRenderPrompt({ files, entryPath, format, instructions, spec, direct }) {
->>>>>>> df90e14 (Changes)
   const entryFile = files.find((f) => f.path === entryPath) || files[0];
   const others = files.filter((f) => f !== entryFile);
   const parts = [
@@ -794,19 +739,6 @@ function buildRenderPrompt({ files, entryPath, format, instructions, spec, direc
     'Compile the entry file. Modules below are included ONLY if the entry file references them by name — otherwise ignore them completely.',
   ];
   if (instructions?.trim()) parts.push(`STANDING BUILD NOTES FROM THE DREAMER: ${instructions.trim()}`);
-<<<<<<< HEAD
-  parts.push('', `════════ ENTRY file: ${entryFile.path} ════════`, entryFile.content);
-  for (const f of others) parts.push('', `════════ module (only if referenced by the entry): ${f.path} ════════`, f.content);
-  parts.push('', 'Compile now — exactly what is written, nothing else. Remember the fidelity law: identifiers are never visible text, textless elements stay empty, and nothing may exist without a source line. Write index.html, run the mandatory self-audit, then give the short build log message.');
-  return parts.join('\n');
-}
-
-function buildIncrementalPrompt({ files, entryPath, format, instructions, notesChanged, changes }) {
-  const entryFile = files.find((f) => f.path === entryPath) || files[0];
-  const parts = [
-    'INCREMENTAL BUILD — the compiled site already exists as index.html in the current directory.',
-    'Read index.html, then apply the SMALLEST edits that make it reflect the source changes below — and ONLY those changes. Use the Edit tool; do not rewrite the file. Everything not required by the changes must remain byte-for-byte untouched.',
-=======
   parts.push(...specParts(spec));
   parts.push('', `════════ ENTRY file: ${entryFile.path} ════════`, entryFile.content);
   for (const f of others) parts.push('', `════════ module (only if referenced by the entry): ${f.path} ════════`, f.content);
@@ -823,13 +755,10 @@ function buildIncrementalPrompt({ files, entryPath, format, instructions, notesC
     direct
       ? 'The current index.html is reproduced below. Return the FULL updated file with the SMALLEST possible changes applied — and ONLY those changes. Everything not required by the changes must come back byte-for-byte identical.'
       : 'Read index.html, then apply the SMALLEST edits that make it reflect the source changes below — and ONLY those changes. Use the Edit tool; do not rewrite the file. Everything not required by the changes must remain byte-for-byte untouched.',
->>>>>>> df90e14 (Changes)
     `TARGET FORMAT: ${targetLine(format)} (unchanged)`,
     `ENTRY FILE: ${entryPath}`,
   ];
   if (instructions?.trim()) parts.push(`STANDING BUILD NOTES${notesChanged ? ' (these changed since the last build — re-apply where relevant)' : ''}: ${instructions.trim()}`);
-<<<<<<< HEAD
-=======
   parts.push(...specParts(spec));
   // A spec edit is a change to what the EXISTING build means, which no source
   // diff will show. Saying so is the only thing that makes the compiler re-read
@@ -839,7 +768,6 @@ function buildIncrementalPrompt({ files, entryPath, format, instructions, notesC
       ? 'THE LANGUAGE SPEC ABOVE CHANGED SINCE THE LAST BUILD. Re-read it, then re-check the existing build against it: anything the previous build got wrong under the old spec (or under a guess, where there was no spec) must be corrected now, even where the source did not change. Keep the edits minimal and targeted — this is still an incremental build.'
       : 'THE LANGUAGE SPEC WAS REMOVED SINCE THE LAST BUILD. Keep the existing build as it is except where the source changes below require otherwise — do not undo interpretations that still match the source.');
   }
->>>>>>> df90e14 (Changes)
   parts.push('', 'SOURCE CHANGES SINCE THE LAST BUILD:');
   for (const c of changes.changed) {
     parts.push('', `════════ ${c.path} — PREVIOUS version ════════`, c.prev, '', `════════ ${c.path} — CURRENT version ════════`, c.curr);
@@ -849,12 +777,6 @@ function buildIncrementalPrompt({ files, entryPath, format, instructions, notesC
   parts.push('', 'FULL CURRENT SOURCE for fidelity reference — the existing build traces to these files (entry first, then modules that count only if the entry references them). Content that traces to any of them is legitimate; do NOT remove it unless the diff above removed its source line:');
   parts.push('', `════════ ENTRY: ${entryFile?.path ?? entryPath} ════════`, entryFile?.content ?? '');
   for (const f of files.filter((x) => x !== entryFile)) parts.push('', `════════ module: ${f.path} ════════`, f.content);
-<<<<<<< HEAD
-  parts.push('', 'Apply the minimal edits now — change only what the diff requires, verify against the FULL source (identifiers never visible, no invented copy, nothing unwritten, nothing written removed). Then give the short build log message.');
-  return parts.join('\n');
-}
-
-=======
   if (direct && currentHtml) parts.push('', '════════ CURRENT index.html — the build you are updating ════════', currentHtml);
   parts.push('', `Apply the minimal edits now — change only what the diff requires, verify against the FULL source (identifiers never visible, no invented copy, nothing unwritten, nothing written removed)${spec?.text ? ', and against the dreamer\'s language spec above (every construct it defines behaves as it says)' : ''}. ${direct
     ? 'Return the complete updated index.html in one ```html block, then the short build log message.'
@@ -936,7 +858,6 @@ function estimateCost(modelInfo, usage) {
 }
 
 
->>>>>>> df90e14 (Changes)
 const MANIFEST = () => path.join(OUTPUT, '.imaginecode-build.json');
 async function readManifest() {
   try { return JSON.parse(await fs.readFile(MANIFEST(), 'utf8')); } catch { return null; }
@@ -954,14 +875,6 @@ function diffSources(prev, files) {
 
 // ---------------------------------------------------------------- API: connection
 
-<<<<<<< HEAD
-app.get('/api/status', (req, res) => {
-  res.json({ ...state.connection, models: MODELS, defaultModel: DEFAULT_MODEL, lastBuild: state.lastBuild, building: !!state.render });
-});
-
-app.post('/api/connect', async (req, res) => {
-  const t0 = Date.now();
-=======
 app.get('/api/status', async (req, res) => {
   const providers = {};
   for (const id of Object.keys(PROVIDERS)) providers[id] = await providerPayload(id);
@@ -1055,7 +968,6 @@ app.post('/api/connect', async (req, res) => {
   }
 
   // ── Claude Code: handshake through the Agent SDK
->>>>>>> df90e14 (Changes)
   const [version, method] = await Promise.all([claudeVersion(), Promise.resolve(detectAuthMethod())]);
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 90_000);
@@ -1072,10 +984,7 @@ app.post('/api/connect', async (req, res) => {
         settingSources: ['user'],
         abortController: controller,
         env: sdkEnv(),
-<<<<<<< HEAD
-=======
         ...claudeExec(),
->>>>>>> df90e14 (Changes)
       },
     });
     let ok = false, resultMsg = null;
@@ -1086,11 +995,7 @@ app.post('/api/connect', async (req, res) => {
       }
     }
     clearTimeout(timeout);
-<<<<<<< HEAD
-    state.connection = {
-=======
     state.connections['claude-code'] = {
->>>>>>> df90e14 (Changes)
       connected: ok,
       checkedAt: new Date().toISOString(),
       version: version || 'Claude Agent SDK (bundled)',
@@ -1100,11 +1005,7 @@ app.post('/api/connect', async (req, res) => {
     };
   } catch (err) {
     clearTimeout(timeout);
-<<<<<<< HEAD
-    state.connection = {
-=======
     state.connections['claude-code'] = {
->>>>>>> df90e14 (Changes)
       connected: false,
       checkedAt: new Date().toISOString(),
       version: version || null,
@@ -1115,9 +1016,6 @@ app.post('/api/connect', async (req, res) => {
         : String(err?.message || err),
     };
   }
-<<<<<<< HEAD
-  res.json(state.connection);
-=======
   res.json({ ...state.connections['claude-code'], provider: 'claude-code' });
 });
 
@@ -1296,7 +1194,6 @@ app.post('/api/rules/infer', async (req, res) => {
     // would otherwise sit on the event loop long after the answer was sent
     clearTimeout(timeout);
   }
->>>>>>> df90e14 (Changes)
 });
 
 // ---------------------------------------------------------------- API: files
@@ -1386,11 +1283,6 @@ app.get('/api/search', async (req, res) => {
 // ---------------------------------------------------------------- API: render (the compiler)
 
 app.post('/api/render', async (req, res) => {
-<<<<<<< HEAD
-  const { entry, format = 'html', model = DEFAULT_MODEL, effort, instructions, fresh } = req.body || {};
-  const modelInfo = MODELS[model] || MODELS[DEFAULT_MODEL];
-  const modelId = MODELS[model] ? model : DEFAULT_MODEL;
-=======
   const { entry, format = 'html', model, effort, instructions, fresh } = req.body || {};
   const providerId = PROVIDERS[req.body?.provider] ? req.body.provider : DEFAULT_PROVIDER;
   const provider = PROVIDERS[providerId];
@@ -1403,7 +1295,6 @@ app.post('/api/render', async (req, res) => {
   const catalog = mergeCatalog(providerId, direct ? liveCache[providerId]?.models || null : null);
   const modelId = catalog[model] ? model : (direct && typeof model === 'string' && model.trim()) || provider.defaultModel;
   const modelInfo = catalog[modelId] || {};
->>>>>>> df90e14 (Changes)
 
   if (state.render) {
     ndjson(state.render.res, { type: 'error', message: 'Superseded by a new build.' });
@@ -1426,15 +1317,12 @@ app.post('/api/render', async (req, res) => {
   const finish = () => { if (state.render?.res === res) state.render = null; };
 
   try {
-<<<<<<< HEAD
-=======
     const { key: apiKey } = direct ? providerKey(providerId) : { key: null };
     if (direct && !apiKey) {
       ndjson(res, { type: 'error', message: `No ${provider.label} key saved — add one in Settings → Compiler Provider.` });
       res.end(); return finish();
     }
 
->>>>>>> df90e14 (Changes)
     const files = await collectSources(WORKSPACE);
     if (!files.length) {
       ndjson(res, { type: 'error', message: 'The workspace is empty — imagine something first.' });
@@ -1442,32 +1330,22 @@ app.post('/api/render', async (req, res) => {
     }
     const entryPath = files.some((f) => f.path === entry) ? entry : files[0].path;
 
-<<<<<<< HEAD
-=======
     // The spec is read fresh per build (the dreamer may have just edited it) and
     // compared against what the last build was compiled under, because an edit
     // to it changes the meaning of source that did not itself change.
     const spec = compileRules(readRules());
 
->>>>>>> df90e14 (Changes)
     // incremental unless: first build, forced fresh, or format/entry changed
     const manifest = fresh ? null : await readManifest();
     const canIncrement = !!manifest && existsSync(path.join(OUTPUT, 'index.html'))
       && manifest.format === format && manifest.entry === entryPath;
     let mode = 'fresh', changes = null;
     const notesChanged = (manifest?.instructions || '') !== (instructions || '');
-<<<<<<< HEAD
-    if (canIncrement) {
-      changes = diffSources(manifest.sources || {}, files);
-      const changeCount = changes.changed.length + changes.added.length + changes.removed.length;
-      if (!changeCount && !notesChanged) {
-=======
     const specNowChanged = (manifest?.spec || '') !== (spec.text || '');
     if (canIncrement) {
       changes = diffSources(manifest.sources || {}, files);
       const changeCount = changes.changed.length + changes.added.length + changes.removed.length;
       if (!changeCount && !notesChanged && !specNowChanged) {
->>>>>>> df90e14 (Changes)
         ndjson(res, { type: 'stage', text: 'no changes since the last build — the existing site is already up to date' });
         ndjson(res, { type: 'done', ok: true, seconds: 0, costUsd: 0, url: '/preview/' });
         res.end(); return finish();
@@ -1480,12 +1358,6 @@ app.post('/api/render', async (req, res) => {
     }
 
     const effortLevel = modelInfo.supportsEffort ? (effort || modelInfo.effortDefault) : undefined;
-<<<<<<< HEAD
-    ndjson(res, { type: 'stage', text: `imagine build --entry ${entryPath} --target ${format} --model ${modelId}${effortLevel ? `[${effortLevel}]` : ''}${mode === 'incremental' ? ' --incremental' : ''}` });
-    if (mode === 'incremental') {
-      const n = changes.changed.length + changes.added.length + changes.removed.length;
-      ndjson(res, { type: 'stage', text: `editing the existing build — ${n} source change${n === 1 ? '' : 's'}${notesChanged ? ' + updated build notes' : ''}, everything else stays untouched` });
-=======
     ndjson(res, { type: 'stage', text: `imagine build --entry ${entryPath} --target ${format} --via ${providerId} --model ${modelId}${effortLevel ? `[${effortLevel}]` : ''}${mode === 'incremental' ? ' --incremental' : ''}` });
     if (spec.text) {
       ndjson(res, { type: 'stage', text: `reading your language spec… ${spec.ruleCount} rule${spec.ruleCount === 1 ? '' : 's'}${spec.exampleCount ? `, ${spec.exampleCount} worked example${spec.exampleCount === 1 ? '' : 's'}` : ''} — the compiler follows these over its own guesses` });
@@ -1494,17 +1366,10 @@ app.post('/api/render', async (req, res) => {
     if (mode === 'incremental') {
       const n = changes.changed.length + changes.added.length + changes.removed.length;
       ndjson(res, { type: 'stage', text: `${direct ? 'rewriting' : 'editing'} the existing build — ${n} source change${n === 1 ? '' : 's'}${notesChanged ? ' + updated build notes' : ''}${specNowChanged ? ' + updated language spec' : ''}, everything else stays untouched` });
->>>>>>> df90e14 (Changes)
     } else {
       ndjson(res, { type: 'stage', text: `reading imagination… ${files.length} file${files.length === 1 ? '' : 's'}, ${files.reduce((n, f) => n + f.content.split('\n').length, 0)} lines` });
     }
 
-<<<<<<< HEAD
-    const q = query({
-      prompt: mode === 'incremental'
-        ? buildIncrementalPrompt({ files, entryPath, format, instructions, notesChanged, changes })
-        : buildRenderPrompt({ files, entryPath, format, instructions }),
-=======
     const indexPath = path.join(OUTPUT, 'index.html');
     const writeManifest = () => fs.writeFile(MANIFEST(), JSON.stringify({
       entry: entryPath,
@@ -1571,7 +1436,6 @@ app.post('/api/render', async (req, res) => {
       prompt: mode === 'incremental'
         ? buildIncrementalPrompt({ files, entryPath, format, instructions, notesChanged, specChanged: specNowChanged, spec, changes })
         : buildRenderPrompt({ files, entryPath, format, instructions, spec }),
->>>>>>> df90e14 (Changes)
       options: {
         cwd: OUTPUT,
         model: modelId,
@@ -1584,10 +1448,7 @@ app.post('/api/render', async (req, res) => {
         maxTurns: 30,
         abortController: controller,
         env: sdkEnv(),
-<<<<<<< HEAD
-=======
         ...claudeExec(),
->>>>>>> df90e14 (Changes)
       },
     });
 
@@ -1616,21 +1477,6 @@ app.post('/api/render', async (req, res) => {
     }
 
     const seconds = ((Date.now() - t0) / 1000).toFixed(1);
-<<<<<<< HEAD
-    const built = existsSync(path.join(OUTPUT, 'index.html'));
-
-    if (finalResult && !finalResult.is_error && built) {
-      const costUsd = finalResult.total_cost_usd ?? null;
-      state.lastBuild = { at: new Date().toISOString(), format, model: modelId, seconds: Number(seconds), costUsd };
-      state.connection.connected = true;
-      await fs.writeFile(MANIFEST(), JSON.stringify({
-        entry: entryPath,
-        format,
-        instructions: instructions || '',
-        sources: Object.fromEntries(files.map((f) => [f.path, f.content])),
-        at: new Date().toISOString(),
-      })).catch(() => {});
-=======
     const built = existsSync(indexPath);
 
     if (finalResult && !finalResult.is_error && built) {
@@ -1638,7 +1484,6 @@ app.post('/api/render', async (req, res) => {
       state.lastBuild = { at: new Date().toISOString(), format, provider: providerId, model: modelId, seconds: Number(seconds), costUsd };
       conn('claude-code').connected = true;
       await writeManifest();
->>>>>>> df90e14 (Changes)
       ndjson(res, { type: 'summary', text: finalResult.result || '' });
       ndjson(res, { type: 'done', ok: true, seconds: Number(seconds), costUsd, url: '/preview/' });
     } else if (controller.signal.aborted) {
@@ -1648,12 +1493,6 @@ app.post('/api/render', async (req, res) => {
       ndjson(res, { type: 'error', message: `build failed after ${seconds}s — ${String(reason).slice(0, 400)}` });
     }
   } catch (err) {
-<<<<<<< HEAD
-    if (controller.signal.aborted) {
-      ndjson(res, { type: 'error', message: 'build stopped' });
-    } else {
-      ndjson(res, { type: 'error', message: `compiler crashed — ${String(err?.message || err).slice(0, 400)}` });
-=======
     if (controller.signal.aborted || err?.name === 'AbortError') {
       ndjson(res, { type: 'error', message: 'build stopped' });
     } else {
@@ -1662,7 +1501,6 @@ app.post('/api/render', async (req, res) => {
       const raw = String(err?.message || err).slice(0, 400);
       const explained = direct && /\b(4\d\d|5\d\d)\b|key|limit|quota|credit/i.test(raw);
       ndjson(res, { type: 'error', message: explained ? raw : `compiler crashed — ${raw}` });
->>>>>>> df90e14 (Changes)
     }
   }
   res.end();
@@ -1691,8 +1529,6 @@ app.use('/preview', (req, res, next) => {
   next();
 }, express.static(OUTPUT));
 
-<<<<<<< HEAD
-=======
 // Monaco is vendored into node_modules so the desktop app has a working editor
 // with no internet at all; a bare checkout that skipped the dependency still
 // falls back to the CDN through IMAGINE_ENV below.
@@ -1713,13 +1549,10 @@ app.get('/env.js', (req, res) => {
   );
 });
 
->>>>>>> df90e14 (Changes)
 app.use(express.static(PUBLIC));
 
 // ---------------------------------------------------------------- boot
 
-<<<<<<< HEAD
-=======
 // A brand-new install opens on an empty explorer, which is a bleak first
 // impression for an IDE whose whole point is "look what you can write".
 // The seed imaginations are copied in exactly once, and never restored after
@@ -1742,36 +1575,22 @@ async function seedWorkspace() {
   }
 }
 
->>>>>>> df90e14 (Changes)
 async function ensureDirs() {
   await fs.mkdir(WORKSPACE, { recursive: true });
   await fs.mkdir(OUTPUT, { recursive: true });
   await fs.mkdir(PUBLIC, { recursive: true });
-<<<<<<< HEAD
-=======
   await seedWorkspace();
->>>>>>> df90e14 (Changes)
 }
 
 const BASE_PORT = Number(process.env.PORT) || 3333;
 async function start(port, attempt = 0) {
   await ensureDirs();
-<<<<<<< HEAD
-  const server = app.listen(port, () => {
-=======
   const server = app.listen(port, '127.0.0.1', () => {
->>>>>>> df90e14 (Changes)
     console.log('');
     console.log('  ✦ ImagineCode — the compiler for languages that don\'t exist yet');
     console.log(`  ✦ IDE:     http://localhost:${port}`);
     console.log(`  ✦ Preview: http://localhost:${port}/preview/`);
     console.log('');
-<<<<<<< HEAD
-  });
-  server.on('error', (err) => {
-    if (err.code === 'EADDRINUSE' && attempt < 10) start(port + 1, attempt + 1);
-    else { console.error(err); process.exit(1); }
-=======
     // the desktop shell waits for this before it opens a window
     process.send?.({ type: 'listening', port, url: `http://127.0.0.1:${port}` });
   });
@@ -1782,7 +1601,6 @@ async function start(port, attempt = 0) {
       process.send?.({ type: 'fatal', message: String(err?.message || err) });
       process.exit(1);
     }
->>>>>>> df90e14 (Changes)
   });
 }
 start(BASE_PORT);

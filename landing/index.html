@@ -1,0 +1,887 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ImagineCode — the IDE for programming languages that don't exist yet</title>
+
+<meta name="description" content="Invent a syntax — any syntax, any file extension. Press Run and a model reads your imagination the way a compiler reads source, then builds a real, working website. Free, open source, MIT.">
+<meta name="theme-color" content="#08080a">
+<meta name="color-scheme" content="dark">
+
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/icon-256.png">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="ImagineCode — the IDE for programming languages that don't exist yet">
+<meta property="og:description" content="Invent a syntax. Press Run. Get a real, working website. Free and open source.">
+<meta property="og:image" content="assets/social-preview.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="assets/social-preview.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Schibsted+Grotesk:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Fragment+Mono:ital@0;1&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     atmosphere — grain, bloom, weave. present on every scroll depth.
+     ═══════════════════════════════════════════════════════════════ -->
+<div class="grain" aria-hidden="true"></div>
+<div class="spotlight" aria-hidden="true"></div>
+<div class="scroll-rail" aria-hidden="true"><i></i></div>
+
+<!-- ═══════════════ preloader ═══════════════ -->
+<div class="boot" id="boot" aria-hidden="true">
+  <div class="boot-inner">
+    <svg class="boot-spark" viewBox="0 0 1024 1024">
+      <defs>
+        <linearGradient id="bs" x1=".24" y1="0" x2=".78" y2="1">
+          <stop offset="0" stop-color="#f6ffdd"/><stop offset=".3" stop-color="#dcff77"/>
+          <stop offset=".68" stop-color="#c6f24e"/><stop offset="1" stop-color="#9bd016"/>
+        </linearGradient>
+      </defs>
+      <path d="M 512 234 Q 539.3 448.2 694 486 Q 539.3 523.8 512 738 Q 484.7 523.8 330 486 Q 484.7 448.2 512 234 Z" fill="url(#bs)"/>
+    </svg>
+    <div class="boot-bar"><i></i></div>
+    <div class="boot-label">warming the compiler</div>
+  </div>
+</div>
+
+
+<!-- ═══════════════ nav ═══════════════ -->
+<header class="nav" id="nav">
+  <a class="nav-lockup" href="#top" aria-label="ImagineCode, back to top">
+    <svg class="mark" viewBox="0 0 1024 1024" aria-hidden="true">
+      <defs>
+        <linearGradient id="nm" x1=".24" y1="0" x2=".78" y2="1">
+          <stop offset="0" stop-color="#f6ffdd"/><stop offset=".3" stop-color="#dcff77"/>
+          <stop offset=".68" stop-color="#c6f24e"/><stop offset="1" stop-color="#9bd016"/>
+        </linearGradient>
+        <linearGradient id="nms" x1=".2" y1="0" x2=".8" y2="1">
+          <stop offset="0" stop-color="#eaffb4"/><stop offset="1" stop-color="#b6e63a"/>
+        </linearGradient>
+      </defs>
+      <path d="M 512 234 Q 539.3 448.2 694 486 Q 539.3 523.8 512 738 Q 484.7 523.8 330 486 Q 484.7 448.2 512 234 Z" fill="url(#nm)"/>
+      <path d="M 726 636 Q 734.7 704 784 716 Q 734.7 728 726 796 Q 717.3 728 668 716 Q 717.3 704 726 636 Z" fill="url(#nms)"/>
+    </svg>
+    <span class="wordmark">ImagineCode</span>
+  </a>
+
+  <nav class="nav-links" aria-label="Sections">
+    <a href="#how">How it works</a>
+    <a href="#examples">Examples</a>
+    <a href="#rules">Language Rules</a>
+    <a href="#providers">Providers</a>
+    <a href="#download">Get it</a>
+  </nav>
+
+  <div class="nav-cta">
+    <a class="btn btn-ghost" href="https://github.com/b1onix/ImagineCode" target="_blank" rel="noopener">
+      <svg viewBox="0 0 16 16" class="ico" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.07-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A7.995 7.995 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+      <span>GitHub</span>
+    </a>
+    <!-- the bar has room for exactly one; JS repoints it at the visitor's OS.
+         Without JS it stays on Windows, and the download section lists both. -->
+    <a class="btn btn-solid magnetic" data-dl-auto
+       data-href-win="https://github.com/b1onix/ImagineCode/releases/download/windows/ImagineCode-Setup-1.0.0.exe"
+       data-href-mac="https://github.com/b1onix/ImagineCode/releases"
+       href="https://github.com/b1onix/ImagineCode/releases/download/windows/ImagineCode-Setup-1.0.0.exe">
+      <svg viewBox="0 0 16 16" class="ico" aria-hidden="true"><path fill="currentColor" d="M8 1v8.6l2.7-2.7 1.1 1.1L8 12 4.2 8l1.1-1.1L8 9.6V1h0ZM2 13h12v1.6H2V13Z"/></svg>
+      <span>Download for <b class="os-name">Windows</b></span>
+    </a>
+  </div>
+
+  <button class="nav-burger" id="burger" aria-label="Menu" aria-expanded="false"><i></i><i></i></button>
+</header>
+
+
+<main id="top">
+
+<!-- ═══════════════════════════════════════════════════════════════
+     HERO
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="hero">
+  <div class="hero-bloom" aria-hidden="true"></div>
+  <div class="hero-weave" aria-hidden="true"></div>
+  <div class="hero-vignette" aria-hidden="true"></div>
+  <div class="topline" aria-hidden="true"></div>
+
+  <div class="hero-grid">
+
+    <div class="hero-copy">
+      <div class="eyebrow reveal">
+        <span class="dot"></span>
+        <span>v1.0 · MIT · free forever</span>
+      </div>
+
+      <h1 class="display split" data-split>
+        The IDE for programming languages
+        <em>that don&rsquo;t exist yet.</em>
+      </h1>
+
+      <p class="lede reveal" data-d="1">
+        Invent a syntax &mdash; any syntax, any file extension. Press
+        <span class="run-chip"><span class="tri">&#9654;</span> Run</span>
+        and a model reads your imagination the way a compiler reads source,
+        then builds a <b>real, working website</b>.
+      </p>
+
+      <div class="exts reveal" data-d="2">
+        <span class="ext">.imagine</span>
+        <span class="ext">.dream</span>
+        <span class="ext">.dreamjs</span>
+        <span class="arrow">&rarr;</span>
+        <span class="ext any">.anything</span>
+      </div>
+
+      <!-- both builds are always in the markup. JS only decides which one
+           wears the solid fill and goes first — it never hides the other. -->
+      <div class="hero-actions reveal" data-d="3">
+        <a class="btn btn-solid btn-lg magnetic" data-dl="win" href="https://github.com/b1onix/ImagineCode/releases/download/windows/ImagineCode-Setup-1.0.0.exe">
+          <svg viewBox="0 0 24 24" class="ico" aria-hidden="true"><path fill="currentColor" d="M0 3.449 9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801"/></svg>
+          <span>Download <span class="mono-sm">.exe</span></span>
+          <span class="btn-sub">Windows &middot; 1.0.0</span>
+        </a>
+        <a class="btn btn-line btn-lg magnetic" data-dl="mac" href="https://github.com/b1onix/ImagineCode/releases">
+          <svg viewBox="0 0 24 24" class="ico" aria-hidden="true"><path fill="currentColor" d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg>
+          <span>Download <span class="mono-sm">.dmg</span></span>
+          <span class="btn-sub">macOS &middot; 1.0.0</span>
+        </a>
+        <a class="btn-text" href="https://github.com/b1onix/ImagineCode" target="_blank" rel="noopener">
+          <svg viewBox="0 0 16 16" class="ico" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.07-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A7.995 7.995 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+          <span>View source</span>
+        </a>
+      </div>
+
+      <div class="hero-foot reveal" data-d="4">
+        <div class="providers">
+          <span>Claude&nbsp;Code</span><i>&middot;</i><span>Anthropic</span><i>&middot;</i><span>OpenAI</span><i>&middot;</i><span>DeepSeek</span>
+        </div>
+        <p class="quote">there are no syntax errors in imagination.</p>
+      </div>
+    </div>
+
+    <!-- ══ the IDE, alive ══ -->
+    <div class="hero-stage" id="heroStage">
+      <div class="window" id="ideWindow">
+
+        <div class="w-title">
+          <div class="wt-left">
+            <svg class="dot-spark" viewBox="0 0 1024 1024" aria-hidden="true"><path d="M 512 234 Q 539.3 448.2 694 486 Q 539.3 523.8 512 738 Q 484.7 523.8 330 486 Q 484.7 448.2 512 234 Z" fill="#c6f24e"/></svg>
+            <div class="menus"><span>File</span><span>Edit</span><span>Imagine</span><span>Help</span></div>
+          </div>
+          <div class="wt-center">synthwave.dreamjs &mdash; imaginecode</div>
+          <div class="wt-right"><span>&#9654; RUN</span><span>&middot;</span><span>CTRL+ENTER</span></div>
+        </div>
+
+        <div class="w-body">
+
+          <!-- editor column -->
+          <div class="w-left">
+            <div class="tabs">
+              <div class="tab on"><span class="glyph">&#10022;</span>synthwave.dreamjs</div>
+              <div class="tab"><span class="glyph">&#10022;</span>bean-there.imagine</div>
+            </div>
+
+            <div class="code" id="heroCode" aria-hidden="true"></div>
+
+            <div class="term">
+              <div class="term-head">
+                <span class="on">IMAGINE TERMINAL</span><span class="off">PROBLEMS</span><span class="off">OUTPUT</span>
+              </div>
+              <div class="term-body" id="heroTerm"></div>
+            </div>
+          </div>
+
+          <!-- preview column: the compiled artefact, live -->
+          <div class="w-right">
+            <div class="pv-head">
+              <span class="live"></span><span>PREVIEW</span>
+              <span class="url">localhost:3333/preview/</span>
+            </div>
+
+            <div class="pv" id="heroPv">
+              <div class="sw-stars"></div>
+              <div class="sw-sun"></div>
+              <div class="sw-horizon"></div>
+              <div class="sw-grid"></div>
+              <div class="sw-copy">
+                <div class="big">NIGHT DRIVE</div>
+                <div class="small">eleven tracks for an empty motorway</div>
+              </div>
+              <div class="sw-deck">
+                <div class="sw-row"><span class="no">01</span><span>Chrome Rain</span><span class="tm">3:58</span></div>
+                <div class="sw-row hot"><span class="no">02</span><span>Lighthouse Protocol</span><span class="tm">4:41</span></div>
+                <div class="sw-row"><span class="no">03</span><span>Ghost In The Sedan</span><span class="tm">5:12</span></div>
+                <div class="sw-row"><span class="no">04</span><span>Neon Grief</span><span class="tm">3:07</span></div>
+              </div>
+              <div class="pv-fade"></div>
+              <div class="pv-scan"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="w-status">
+          <span class="chip hot">&#9889; Claude Code</span><i class="sep"></i>
+          <span class="chip">&#10022; <b>Sonnet 5</b> &middot; medium</span><i class="sep"></i>
+          <span class="chip">&sect; rules: 6</span><i class="sep"></i>
+          <span class="chip">HTML</span>
+          <span class="right"><span class="chip">Ln 13, Col 27</span><i class="sep"></i><span class="chip">dreamjs</span></span>
+        </div>
+      </div>
+
+      <div class="stage-glow" aria-hidden="true"></div>
+    </div>
+  </div>
+
+  <a class="scroll-cue" href="#how" aria-label="Scroll">
+    <span>scroll</span><i></i>
+  </a>
+</section>
+
+
+<!-- ═══════════════ marquee ═══════════════ -->
+<div class="marquee" aria-hidden="true">
+  <div class="marquee-track">
+    <span>.imagine</span><b>&#10022;</b><span>.dream</span><b>&#10022;</b><span>.dreamjs</span><b>&#10022;</b>
+    <span>.jasminko</span><b>&#10022;</b><span>.stranica</span><b>&#10022;</b><span>.function</span><b>&#10022;</b>
+    <span>.poem</span><b>&#10022;</b><span>.vibe</span><b>&#10022;</b><span>.whatever-you-want</span><b>&#10022;</b>
+    <span>.imagine</span><b>&#10022;</b><span>.dream</span><b>&#10022;</b><span>.dreamjs</span><b>&#10022;</b>
+    <span>.jasminko</span><b>&#10022;</b><span>.stranica</span><b>&#10022;</b><span>.function</span><b>&#10022;</b>
+    <span>.poem</span><b>&#10022;</b><span>.vibe</span><b>&#10022;</b><span>.whatever-you-want</span><b>&#10022;</b>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     HOW IT WORKS
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="sec" id="how">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-num reveal">01</div>
+      <h2 class="display split" data-split>Three steps, and <em>no grammar to learn.</em></h2>
+      <p class="sec-lede reveal" data-d="1">
+        There is no parser to satisfy and no keyword list to memorise. You describe
+        what you mean; the compiler reads intent and writes real HTML or React.
+      </p>
+    </div>
+
+    <ol class="steps">
+      <li class="step reveal" data-d="0">
+        <div class="step-n">01</div>
+        <h3>Invent a language</h3>
+        <p>Make a file. Call it <code>.dream</code>, <code>.jasminko</code>, <code>.anything</code>.
+           Write sentences, curly braces, arrows, invented verbs &mdash; whatever feels right to you.</p>
+        <div class="step-art art-write">
+          <div class="mini-code">
+            <span><i class="c-key">universe</i> <i class="c-name">SYNTHWAVE</i> <i class="c-pun">{</i></span>
+            <span>  <i class="c-word">vibe</i> <i class="c-op">-&gt;</i> <i class="c-str">neon, night-drive, 1984</i></span>
+            <span><i class="c-pun">}</i><i class="caret-mini"></i></span>
+          </div>
+        </div>
+      </li>
+
+      <li class="step reveal" data-d="1">
+        <div class="step-n">02</div>
+        <h3>Press Run</h3>
+        <p>The Imagine Terminal streams the compiler's reasoning as it happens &mdash;
+           what it read, how it interpreted each construct, what it built.</p>
+        <div class="step-art art-run">
+          <div class="mini-term">
+            <span><i class="t-mark">&#10022;</i> reading <i class="t-dim">synthwave.dreamjs</i></span>
+            <span><i class="t-mark">&#10022;</i> interpreting <i class="t-stage">universe</i></span>
+            <span><i class="t-ok">&#10003;</i> built <i class="t-dim">214 lines &middot; 12.4s</i></span>
+          </div>
+        </div>
+      </li>
+
+      <li class="step reveal" data-d="2">
+        <div class="step-n">03</div>
+        <h3>Get a real website</h3>
+        <p>Not a mock-up. Actual HTML, CSS and JavaScript served from
+           <code>/preview/</code>, ready to open, ship or keep imagining at.</p>
+        <div class="step-art art-out">
+          <div class="mini-site">
+            <i class="ms-bar"></i><i class="ms-hero"></i>
+            <i class="ms-row"></i><i class="ms-row short"></i>
+            <div class="ms-cards"><i></i><i></i><i></i></div>
+          </div>
+        </div>
+      </li>
+    </ol>
+
+    <!-- pipeline -->
+    <div class="pipeline reveal">
+      <div class="pipe-col">
+        <div class="pipe-label">you</div>
+        <div class="pipe-body">
+          write <code>.dream</code> files<br>+ the rules of your syntax
+        </div>
+      </div>
+      <div class="pipe-arrow"><i></i><span>&rarr;</span></div>
+      <div class="pipe-col accent">
+        <div class="pipe-label">ImagineCode</div>
+        <div class="pipe-body">
+          VS Code&#8209;style IDE &mdash; Monaco, explorer,<br>tabs, imagine terminal, live preview
+        </div>
+      </div>
+      <div class="pipe-arrow"><i></i><span>&rarr;</span></div>
+      <div class="pipe-col">
+        <div class="pipe-label">the compiler</div>
+        <div class="pipe-body">
+          reads your language, interprets<br>intent, writes real HTML or React
+        </div>
+      </div>
+      <div class="pipe-return"><span>&#8592;&nbsp; streams the build log live &nbsp;&middot;&nbsp; serves /preview/ &nbsp;&#8592;</span></div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     EXAMPLES — two invented languages, side by side with the result
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="sec sec-alt" id="examples">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-num reveal">02</div>
+      <h2 class="display split" data-split>Two imaginations, <em>both of them compile.</em></h2>
+      <p class="sec-lede reveal" data-d="1">
+        These ship with every install. One is written in plain English sentences;
+        the other is a curly-brace language no compiler on earth accepts. This one does.
+      </p>
+    </div>
+
+    <div class="demo reveal" data-d="2">
+      <div class="demo-tabs" role="tablist">
+        <button class="dtab on" role="tab" aria-selected="true" data-tab="synth">
+          <span class="glyph">&#10022;</span>synthwave.dreamjs<em>invented curly braces</em>
+        </button>
+        <button class="dtab" role="tab" aria-selected="false" data-tab="bean">
+          <span class="glyph">&#10022;</span>bean-there.imagine<em>prose, no grammar</em>
+        </button>
+      </div>
+
+      <div class="demo-body">
+
+        <!-- ── source ── -->
+        <div class="demo-src">
+          <div class="src-head"><span class="mono-sm">SOURCE</span><span class="mono-sm dim" id="srcMeta">excerpt &middot; dreamjs</span></div>
+
+          <pre class="src on" data-pane="synth"><code><span class="ln"><span class="c-com">// synthwave.dreamjs</span></span>
+<span class="ln"><span class="c-com">// an invented curly-brace language.</span></span>
+<span class="ln"><span class="c-com">// no compiler on earth accepts this.</span></span>
+<span class="ln"><span class="c-com">// this one does.</span></span>
+<span class="ln"></span>
+<span class="ln"><span class="c-key">universe</span> <span class="c-name">SYNTHWAVE</span> <span class="c-pun">{</span></span>
+<span class="ln">  <span class="c-word">vibe</span>    <span class="c-op">-&gt;</span> <span class="c-str">neon, night-drive, 1984, slightly wet asphalt</span></span>
+<span class="ln">  <span class="c-word">palette</span> <span class="c-op">-&gt;</span> <span class="c-str">#05010f base, #ff2e97 hot, #00e5ff cool</span></span>
+<span class="ln">  <span class="c-word">font</span>    <span class="c-op">-&gt;</span> <span class="c-str">a wide geometric sans, a mono for the rest</span></span>
+<span class="ln"><span class="c-pun">}</span></span>
+<span class="ln"></span>
+<span class="ln"><span class="c-key">scene</span> <span class="c-name">Sky</span> <span class="c-pun">{</span></span>
+<span class="ln">  <span class="c-word">background</span>   <span class="c-op">=</span> <span class="c-str">vertical gradient #05010f &rarr; #2b0a3d</span></span>
+<span class="ln">  <span class="c-word">horizon.line</span> <span class="c-op">=</span> <span class="c-str">1px of #ff2e97, glowing</span></span>
+<span class="ln">  <span class="c-word">grid</span> <span class="c-pun">{</span></span>
+<span class="ln">    <span class="c-word">perspective</span> <span class="c-op">=</span> <span class="c-str">true</span></span>
+<span class="ln">    <span class="c-word">animate</span>     <span class="c-op">-&gt;</span> <span class="c-str">scroll toward the viewer, forever, 6s</span></span>
+<span class="ln">  <span class="c-pun">}</span></span>
+<span class="ln">  <span class="c-word">sun</span> <span class="c-pun">{</span></span>
+<span class="ln">    <span class="c-word">slice</span> <span class="c-op">=</span> <span class="c-str">4 horizontal gaps across the lower half</span></span>
+<span class="ln">    <span class="c-word">glow</span>  <span class="c-op">=</span> <span class="c-str">80px of #ff2e97</span></span>
+<span class="ln">    <span class="c-word">float</span> <span class="c-op">-&gt;</span> <span class="c-str">up and down, 4s, gentle</span></span>
+<span class="ln">  <span class="c-pun">}</span></span>
+<span class="ln"><span class="c-pun">}</span></span>
+<span class="ln"></span>
+<span class="ln"><span class="c-key">deck</span> <span class="c-name">Tracklist</span> <span class="c-pun">{</span></span>
+<span class="ln">  <span class="c-word">track</span> <span class="c-pun">{</span> <span class="c-str">"01"</span> <span class="c-op">|</span> <span class="c-str">"Chrome Rain"</span> <span class="c-op">|</span> <span class="c-str">"3:58"</span> <span class="c-pun">}</span></span>
+<span class="ln">  <span class="c-word">track</span> <span class="c-pun">{</span> <span class="c-str">"02"</span> <span class="c-op">|</span> <span class="c-str">"Lighthouse Protocol"</span> <span class="c-op">|</span> <span class="c-str">"4:41"</span> <span class="c-pun">}</span></span>
+<span class="ln">  <span class="c-word">track</span> <span class="c-pun">{</span> <span class="c-str">"03"</span> <span class="c-op">|</span> <span class="c-str">"Ghost In The Sedan"</span> <span class="c-op">|</span> <span class="c-str">"5:12"</span> <span class="c-pun">}</span></span>
+<span class="ln"></span>
+<span class="ln">  <span class="c-key">each</span> <span class="c-word">track</span> <span class="c-pun">{</span></span>
+<span class="ln">    <span class="c-word">border-left</span> <span class="c-op">=</span> <span class="c-str">2px #00e5ff</span></span>
+<span class="ln">    <span class="c-name">OnHover</span>     <span class="c-op">-&gt;</span> <span class="c-str">becomes #ff2e97, slides right 6px</span></span>
+<span class="ln">    <span class="c-name">OnClick</span>     <span class="c-op">-&gt;</span> <span class="c-str">the row starts pulsing</span></span>
+<span class="ln">  <span class="c-pun">}</span></span>
+<span class="ln"><span class="c-pun">}</span></span>
+</code></pre>
+
+          <pre class="src" data-pane="bean"><code><span class="ln"><span class="c-com"># bean-there.imagine</span></span>
+<span class="ln"><span class="c-com"># a language made of sentences.</span></span>
+<span class="ln"><span class="c-com"># there is no grammar. write what you see.</span></span>
+<span class="ln"></span>
+<span class="ln"><span class="c-key">imagine</span> a page for a small coffee shop.</span>
+<span class="ln">  the mood is: <span class="c-str">warm, unhurried, a little bit wooden.</span></span>
+<span class="ln">  the background is the colour of <span class="c-str">oat milk</span>,</span>
+<span class="ln">  the text is the colour of <span class="c-str">espresso</span>.</span>
+<span class="ln"></span>
+<span class="ln"><span class="c-key">at the very top</span>, a slim bar.</span>
+<span class="ln">  on its left, the words <span class="c-str">"Bean There"</span></span>
+<span class="ln">  on its right, three quiet links:</span>
+<span class="ln">    <span class="c-str">"menu" &middot; "hours" &middot; "find us"</span></span>
+<span class="ln">  the bar stays stuck to the top when the page scrolls.</span>
+<span class="ln"></span>
+<span class="ln"><span class="c-key">below it</span>, a tall opening scene, centered.</span>
+<span class="ln">  a very large line of text: <span class="c-str">"we open at six."</span></span>
+<span class="ln">  under it, smaller and softer:</span>
+<span class="ln">    <span class="c-str">"the good beans go first."</span></span>
+<span class="ln">  under that, <span class="c-op">[ see today's menu ]</span> &mdash; a rounded</span>
+<span class="ln">  button the colour of espresso.</span>
+<span class="ln">  when someone clicks it, the page glides down.</span>
+<span class="ln"></span>
+<span class="ln"><span class="c-key">then the menu.</span></span>
+<span class="ln">  a heading: <span class="c-str">"today"</span></span>
+<span class="ln">  three cards side by side, thin border, generous</span>
+<span class="ln">  whitespace:</span>
+<span class="ln"></span>
+<span class="ln">    card one</span>
+<span class="ln">      <span class="c-str">"flat white"</span> &middot; <span class="c-str">"£3.20"</span></span>
+<span class="ln">      <span class="c-str">"milk, folded not poured"</span></span>
+<span class="ln"></span>
+<span class="ln">    card two</span>
+<span class="ln">      <span class="c-str">"cortado"</span> &middot; <span class="c-str">"£3.00"</span></span>
+<span class="ln">      <span class="c-str">"small, serious, gone in four sips"</span></span>
+<span class="ln"></span>
+<span class="ln">  when the mouse hovers a card it lifts a few pixels</span>
+<span class="ln">  and its shadow deepens.</span>
+<span class="ln">  on a narrow screen the three cards stack.</span>
+</code></pre>
+        </div>
+
+        <!-- ── result ── -->
+        <div class="demo-out">
+          <div class="out-head">
+            <span class="live"></span><span class="mono-sm">COMPILED &middot; /preview/</span>
+            <span class="mono-sm dim right" id="outMeta">12.4s</span>
+          </div>
+
+          <!-- synthwave result -->
+          <div class="out-pane on" data-pane="synth">
+            <div class="synth">
+              <div class="sw-stars"></div>
+              <div class="sw-sun"></div>
+              <div class="sw-horizon"></div>
+              <div class="sw-grid"></div>
+              <div class="synth-copy">
+                <div class="big">NIGHT DRIVE</div>
+                <div class="small">eleven tracks for an empty motorway</div>
+              </div>
+              <div class="synth-deck">
+                <div class="sw-row"><span class="no">01</span><span>Chrome Rain</span><span class="tm">3:58</span></div>
+                <div class="sw-row"><span class="no">02</span><span>Lighthouse Protocol</span><span class="tm">4:41</span></div>
+                <div class="sw-row"><span class="no">03</span><span>Ghost In The Sedan</span><span class="tm">5:12</span></div>
+                <div class="sw-row"><span class="no">04</span><span>Neon Grief</span><span class="tm">3:07</span></div>
+                <div class="sw-row"><span class="no">05</span><span>Afterglow, Slowly</span><span class="tm">6:20</span></div>
+                <div class="sw-row"><span class="no">06</span><span>Static Cassette</span><span class="tm">4:04</span></div>
+              </div>
+              <div class="synth-credit">compiled from imagination</div>
+            </div>
+          </div>
+
+          <!-- bean there result -->
+          <div class="out-pane" data-pane="bean">
+            <div class="bean">
+              <div class="bean-bar">
+                <span class="bean-logo">Bean There</span>
+                <span class="bean-links"><i>menu</i><i>hours</i><i>find us</i></span>
+              </div>
+              <div class="bean-hero">
+                <div class="bean-h1">we open at six.</div>
+                <div class="bean-sub">the good beans go first.</div>
+                <div class="bean-btn">see today&rsquo;s menu</div>
+              </div>
+              <div class="bean-menu">
+                <div class="bean-h2">today</div>
+                <div class="bean-cards">
+                  <div class="bean-card"><b>flat white</b><span class="p">&pound;3.20</span><i>milk, folded not poured</i></div>
+                  <div class="bean-card"><b>cortado</b><span class="p">&pound;3.00</span><i>small, serious, gone in four sips</i></div>
+                  <div class="bean-card"><b>filter</b><span class="p">&pound;2.60</span><i>whatever the roaster is excited about</i></div>
+                </div>
+                <div class="bean-h2 sm">hours</div>
+                <div class="bean-hours">weekdays &mdash; 6am until the pastries run out<br>weekends &mdash; 8am, slower, better</div>
+              </div>
+              <div class="bean-foot">made of beans and imagination</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo-note">
+        <span class="glyph">&#10022;</span>
+        <p>Both panes are the real example files that ship in
+        <code>resources/seed-workspace/</code> &mdash; and the shape of what they compile to.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     FEATURES
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="sec" id="features">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-num reveal">03</div>
+      <h2 class="display split" data-split>A real instrument, <em>not a toy prompt box.</em></h2>
+      <p class="sec-lede reveal" data-d="1">
+        Monaco, an explorer, tabs, a command palette, quick-open, a status bar with
+        live chips. Everything you expect from an editor &mdash; pointed at a language
+        that doesn&rsquo;t exist.
+      </p>
+    </div>
+
+    <div class="cards">
+      <article class="card reveal wide" data-d="0">
+        <div class="card-ico">&sect;</div>
+        <h3>Language Rules</h3>
+        <p>Only you know that <code>~&gt;</code> means <i>&ldquo;fades in over two seconds&rdquo;</i>
+           and not <i>&ldquo;flows into&rdquo;</i>. Write it down once and the compiler follows your
+           definitions instead of guessing. Your spec is sent <b>ahead of your source</b>
+           on every build.</p>
+        <div class="kbd-hint"><kbd>Ctrl</kbd><kbd>Shift</kbd><kbd>L</kbd></div>
+      </article>
+
+      <article class="card reveal" data-d="1">
+        <div class="card-ico">&#9889;</div>
+        <h3>Four compilers, one switch</h3>
+        <p>Claude Code, Anthropic, OpenAI or DeepSeek. Bring whichever you already
+           have &mdash; you need exactly one.</p>
+      </article>
+
+      <article class="card reveal" data-d="2">
+        <div class="card-ico">&#9654;</div>
+        <h3>The Imagine Terminal</h3>
+        <p>Watch the build think. Reading, interpreting, writing &mdash; streamed live,
+           with token counts and an estimated cost.</p>
+      </article>
+
+      <article class="card reveal" data-d="3">
+        <div class="card-ico">&#9635;</div>
+        <h3>HTML or React</h3>
+        <p>One self-contained page, or function components with hooks via CDN.
+           No build step either way.</p>
+      </article>
+
+      <article class="card reveal" data-d="4">
+        <div class="card-ico">&#128274;</div>
+        <h3>Keys stay server-side</h3>
+        <p>Never in <code>localStorage</code>, never in the page. A <code>0600</code> file
+           on your disk &mdash; or just an environment variable.</p>
+      </article>
+
+      <article class="card reveal" data-d="5">
+        <div class="card-ico">&#9729;</div>
+        <h3>Nothing to install</h3>
+        <p>The Windows installer carries its own runtime, its own editor and its own
+           CLI. Not even Node is required.</p>
+      </article>
+
+      <article class="card reveal" data-d="6">
+        <div class="card-ico">&#8635;</div>
+        <h3>Incremental rebuilds</h3>
+        <p>With Claude Code the compiler edits <code>output/</code> directly, so a second
+           run is surgical rather than a rewrite.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     LANGUAGE RULES — the glossary visual
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="sec sec-alt" id="rules">
+  <div class="wrap">
+    <div class="rules-grid">
+
+      <div class="rules-copy">
+        <div class="sec-num reveal">04</div>
+        <h2 class="display split" data-split>Teach the compiler <em>what your syntax means.</em></h2>
+        <p class="sec-lede reveal" data-d="1">
+          The one step that changes the output most. A spec has four parts &mdash; a name,
+          prose about how your language works, a glossary of constructs, and worked
+          examples the compiler treats as test cases to match.
+        </p>
+        <ul class="rules-list reveal" data-d="2">
+          <li><b>Outranks</b> the compiler&rsquo;s own reading heuristics&hellip;</li>
+          <li>&hellip;but never the <b>fidelity law</b>: it defines what your constructs
+              <i>mean</i>, it never adds anything your source didn&rsquo;t write.</li>
+          <li>Edit a rule and the next build re-checks the existing site against the
+              new meaning &mdash; even if no source file changed.</li>
+          <li><b>&#10022; Propose rules from my files</b> reads your workspace and drafts
+              the glossary for you.</li>
+        </ul>
+      </div>
+
+      <div class="rules-panel reveal" data-d="2">
+        <div class="rp-head">
+          <span class="glyph">&sect;</span><span>LANGUAGE RULES</span>
+          <span class="rp-switch on" aria-hidden="true"><i></i></span>
+        </div>
+        <div class="rp-name">
+          <label>Language name</label>
+          <div class="rp-input">dreamjs</div>
+        </div>
+        <div class="rp-glossary">
+          <label>Syntax glossary</label>
+          <div class="gl-row"><code>x ~&gt; y</code><span class="ar">&rarr;</span><i>x fades into y over two seconds</i><span class="tg on"></span></div>
+          <div class="gl-row"><code>universe</code><span class="ar">&rarr;</span><i>the page shell &mdash; palette, fonts, mood</i><span class="tg on"></span></div>
+          <div class="gl-row"><code>scene A over B</code><span class="ar">&rarr;</span><i>A is layered on top of B, absolutely</i><span class="tg on"></span></div>
+          <div class="gl-row"><code>deck</code><span class="ar">&rarr;</span><i>a responsive list of rows</i><span class="tg on"></span></div>
+          <div class="gl-row"><code>::</code><span class="ar">&rarr;</span><i>applies styling to the thing on the left</i><span class="tg on"></span></div>
+          <div class="gl-row off"><code>ending</code><span class="ar">&rarr;</span><i>a small centered footer line</i><span class="tg"></span></div>
+        </div>
+        <div class="rp-foot">
+          <span class="mono-sm">sent ahead of your source on every build</span>
+          <span class="mono-sm accent">5 active</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PROVIDERS
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="sec" id="providers">
+  <div class="wrap">
+    <div class="sec-head center">
+      <div class="sec-num reveal">05</div>
+      <h2 class="display split" data-split>Pick the compiler <em>you already pay for.</em></h2>
+      <p class="sec-lede reveal" data-d="1">
+        ImagineCode reuses your existing setup. One provider is enough &mdash; and
+        <b>&#9889; Connect</b> verifies it with a real round-trip before you build.
+      </p>
+    </div>
+
+    <div class="prov">
+      <div class="prov-row head" aria-hidden="true">
+        <div>Provider</div><div>What it needs</div><div>How it compiles</div>
+      </div>
+
+      <div class="prov-row reveal" data-d="0">
+        <div class="p-name"><span class="p-dot claude"></span>Claude Code<em class="tagpill">default</em></div>
+        <div class="p-need">Your existing Claude&nbsp;Code setup &mdash; <b>no key to paste</b></div>
+        <div class="p-how">Agentic: reads and edits <code>output/</code> directly, so rebuilds are surgical</div>
+      </div>
+      <div class="prov-row reveal" data-d="1">
+        <div class="p-name"><span class="p-dot anth"></span>Anthropic API</div>
+        <div class="p-need">An <code>sk-ant-…</code> key</div>
+        <div class="p-how">One streamed pass that returns the whole page</div>
+      </div>
+      <div class="prov-row reveal" data-d="2">
+        <div class="p-name"><span class="p-dot oai"></span>OpenAI API</div>
+        <div class="p-need">An <code>sk-…</code> key</div>
+        <div class="p-how">One streamed pass (Chat Completions)</div>
+      </div>
+      <div class="prov-row reveal" data-d="3">
+        <div class="p-name"><span class="p-dot ds"></span>DeepSeek API</div>
+        <div class="p-need">An <code>sk-…</code> key</div>
+        <div class="p-how">One streamed pass (OpenAI-compatible endpoint)</div>
+      </div>
+    </div>
+
+    <div class="prov-note reveal">
+      <span class="glyph">&#8635;</span>
+      <p>The built-in model lists are a floor, not a ceiling &mdash; <b>&#8635; models</b> merges
+      your account&rsquo;s own <code>/v1/models</code> response on top.</p>
+    </div>
+
+    <!-- keyboard -->
+    <div class="keys reveal">
+      <h3 class="keys-title">Keyboard</h3>
+      <div class="keys-grid">
+        <div class="key-row"><span><kbd>Ctrl</kbd><kbd>Enter</kbd> <i>/</i> <kbd>F5</kbd></span><em>Run imagination</em></div>
+        <div class="key-row"><span><kbd>Shift</kbd><kbd>F5</kbd></span><em>Stop build</em></div>
+        <div class="key-row"><span><kbd>Ctrl</kbd><kbd>Shift</kbd><kbd>L</kbd></span><em>Language rules</em></div>
+        <div class="key-row"><span><kbd>Ctrl</kbd><kbd>S</kbd></span><em>Save</em></div>
+        <div class="key-row"><span><kbd>Ctrl</kbd><kbd>Shift</kbd><kbd>P</kbd> <i>/</i> <kbd>F1</kbd></span><em>Command palette</em></div>
+        <div class="key-row"><span><kbd>Ctrl</kbd><kbd>P</kbd></span><em>Quick-open file</em></div>
+        <div class="key-row"><span><kbd>Ctrl</kbd><kbd>`</kbd></span><em>Toggle Imagine Terminal</em></div>
+        <div class="key-row"><span><kbd>Ctrl</kbd><kbd>B</kbd></span><em>Toggle sidebar</em></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SHOWCASE — the real social preview, in a frame
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="sec showcase" id="showcase">
+  <div class="wrap">
+    <div class="sec-head center">
+      <div class="sec-num reveal">06</div>
+      <h2 class="display split" data-split>Ink-black surfaces. Hairline geometry.<br><em>One phosphor accent.</em></h2>
+    </div>
+
+    <figure class="shot reveal" data-d="1">
+      <div class="shot-frame" data-parallax="0.06">
+        <img src="assets/social-preview.png" alt="ImagineCode: a VS Code-style IDE compiling an invented language into a real website" loading="lazy" width="1280" height="640">
+        <div class="shot-sheen" aria-hidden="true"></div>
+      </div>
+      <figcaption>
+        The IDE, mid-build &mdash; <code>synthwave.dreamjs</code> on the left,
+        the site it just became on the right.
+      </figcaption>
+    </figure>
+
+    <div class="stats">
+      <div class="stat reveal" data-d="0"><b data-count="4">0</b><span>compiler providers</span></div>
+      <div class="stat reveal" data-d="1"><b data-count="2">0</b><span>output formats</span></div>
+      <div class="stat reveal" data-d="2"><b data-count="0" data-suffix="&infin;">0</b><span>file extensions</span></div>
+      <div class="stat reveal" data-d="3"><b data-count="0" data-suffix="MIT">0</b><span>open source, forever</span></div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     DOWNLOAD
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="sec download" id="download">
+  <div class="dl-bloom" aria-hidden="true"></div>
+  <div class="wrap">
+    <div class="dl-head">
+      <div class="sec-num reveal">07</div>
+      <h2 class="display split" data-split>Go and imagine <em>something impossible.</em></h2>
+      <p class="sec-lede reveal" data-d="1">
+        Free, open source, MIT. No account, no pricing page, no trial.
+        Windows, macOS, or straight from source &mdash; every link below does
+        exactly what it says.
+      </p>
+    </div>
+
+    <div class="dl-cards">
+      <a class="dl-card primary reveal magnetic" data-dl="win" data-d="2" href="https://github.com/b1onix/ImagineCode/releases/download/windows/ImagineCode-Setup-1.0.0.exe">
+        <div class="dl-top">
+          <img class="dl-icon" src="assets/icon-256.png" alt="" width="72" height="72" loading="lazy">
+          <div>
+            <h3>Windows <span class="os-badge">.exe</span></h3>
+            <p class="mono-sm dim">ImagineCode-Setup-1.0.0.exe</p>
+          </div>
+        </div>
+        <p class="dl-body">
+          Per-user install, <b>no administrator prompt</b>. Start menu and desktop
+          shortcuts. Nothing else needed &mdash; not even Node.
+        </p>
+        <ul class="dl-meta">
+          <li>bundled runtime</li><li>offline editor</li><li>bundled Claude&nbsp;Code CLI</li>
+        </ul>
+        <span class="dl-go">Download <i>&darr;</i></span>
+      </a>
+
+      <a class="dl-card primary reveal magnetic" data-dl="mac" data-d="3" href="https://github.com/b1onix/ImagineCode/releases">
+        <div class="dl-top">
+          <img class="dl-icon" src="assets/icon-256.png" alt="" width="72" height="72" loading="lazy">
+          <div>
+            <h3>macOS <span class="os-badge">.dmg</span></h3>
+            <p class="mono-sm dim">ImagineCode-1.0.0-arm64.dmg</p>
+          </div>
+        </div>
+        <p class="dl-body">
+          Drag to <b>Applications</b> and open. Separate images for Apple&nbsp;silicon
+          and Intel &mdash; each carries the Claude&nbsp;Code binary built for it.
+          Unsigned, so the first launch is <b>right-click &rarr; Open</b>.
+        </p>
+        <ul class="dl-meta">
+          <li>arm64 &middot; x64</li><li>offline editor</li><li>bundled Claude&nbsp;Code CLI</li>
+        </ul>
+        <span class="dl-go">Download <i>&darr;</i></span>
+      </a>
+
+      <div class="dl-card source reveal" data-d="4">
+        <div class="dl-top">
+          <div class="dl-glyph">&#10022;</div>
+          <div>
+            <h3>Anywhere &mdash; from source</h3>
+            <p class="mono-sm dim">the same IDE, in your browser</p>
+          </div>
+        </div>
+        <div class="shellbox">
+          <button class="copy" data-copy="git clone https://github.com/b1onix/ImagineCode
+cd ImagineCode
+npm install
+npm run web" aria-label="Copy commands"><span>copy</span></button>
+<pre><code><span><i class="p">$</i> git clone https://github.com/b1onix/ImagineCode</span>
+<span><i class="p">$</i> cd ImagineCode</span>
+<span><i class="p">$</i> npm install</span>
+<span><i class="p">$</i> npm run web</span>
+<span class="cm">→ http://localhost:3333</span></code></pre>
+        </div>
+        <ul class="dl-meta"><li>Node 18+</li><li>macOS &middot; Linux &middot; Windows</li></ul>
+        <a class="dl-go ghost" href="https://github.com/b1onix/ImagineCode" target="_blank" rel="noopener">Read the source <i>&rarr;</i></a>
+      </div>
+    </div>
+
+    <div class="dl-req reveal">
+      <span class="glyph">&#10022;</span>
+      <p><b>One compiler provider is all you need.</b> Claude&nbsp;Code works with no key to
+      paste; otherwise an Anthropic, OpenAI or DeepSeek key. First launch plays a short
+      introduction &mdash; replay it any time from <b>Help &rarr; Show Introduction</b>.</p>
+    </div>
+  </div>
+</section>
+
+</main>
+
+
+<!-- ═══════════════ footer ═══════════════ -->
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <a class="nav-lockup" href="#top">
+          <svg class="mark" viewBox="0 0 1024 1024" aria-hidden="true">
+            <path d="M 512 234 Q 539.3 448.2 694 486 Q 539.3 523.8 512 738 Q 484.7 523.8 330 486 Q 484.7 448.2 512 234 Z" fill="#c6f24e"/>
+            <path d="M 726 636 Q 734.7 704 784 716 Q 734.7 728 726 796 Q 717.3 728 668 716 Q 717.3 704 726 636 Z" fill="#b6e63a"/>
+          </svg>
+          <span class="wordmark">ImagineCode</span>
+        </a>
+        <p class="foot-quote">there are no syntax errors in imagination.</p>
+      </div>
+
+      <div class="foot-col">
+        <h4>Project</h4>
+        <a href="https://github.com/b1onix/ImagineCode" target="_blank" rel="noopener">Repository</a>
+        <a href="https://github.com/b1onix/ImagineCode#readme" target="_blank" rel="noopener">README</a>
+        <a href="https://github.com/b1onix/ImagineCode/releases" target="_blank" rel="noopener">Releases</a>
+        <a href="https://github.com/b1onix/ImagineCode/issues" target="_blank" rel="noopener">Issues</a>
+      </div>
+
+      <div class="foot-col">
+        <h4>On this page</h4>
+        <a href="#how">How it works</a>
+        <a href="#examples">Examples</a>
+        <a href="#rules">Language Rules</a>
+        <a href="#download">Get it</a>
+      </div>
+
+      <div class="foot-col">
+        <h4>Get it</h4>
+        <a data-dl="win" href="https://github.com/b1onix/ImagineCode/releases/download/windows/ImagineCode-Setup-1.0.0.exe">Windows &middot; .exe</a>
+        <a data-dl="mac" href="https://github.com/b1onix/ImagineCode/releases">macOS &middot; .dmg</a>
+        <a href="https://github.com/b1onix/ImagineCode" target="_blank" rel="noopener">Build from source</a>
+      </div>
+    </div>
+
+    <div class="foot-rule"></div>
+
+    <div class="foot-base">
+      <span>MIT licensed &middot; free forever &middot; no pricing page</span>
+      <span class="mono-sm">v1.0.0</span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>

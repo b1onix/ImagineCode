@@ -2,31 +2,18 @@
 
 **The IDE for programming languages that don't exist yet.**
 
-Invent a language — any syntax, any file extension. Press **▶ Run** and a model compiles your
-imagination into a **real, working website**, live in the built-in preview.
+You invent a programming language — any syntax, any file extension, any rules you can dream up.
+When you press **▶ Run**, a language model reads your imagination like a compiler reads source code
+and builds a **real, working website** from it, served live in the built-in preview.
 
-![ImagineCode — a VS Code-style IDE compiling an invented language into a real website](social-preview.png)
+Bring **Claude Code** (the login you already have) or your own **Anthropic**, **OpenAI** or
+**DeepSeek** API key — whichever you pick does the compiling.
 
 > *"there are no syntax errors in imagination." — the compiler*
 
 ## How it works
 
 ```
-<<<<<<< HEAD
- you                          ImagineCode                       Claude Code
-──────         ─────────────────────────────────────────      ─────────────
- write   ───▶   VS Code-style IDE (Monaco, explorer,     ───▶  reads your invented
- .dream         tabs, imagine terminal, live preview)          language, interprets
- files                                                         intent, writes real
-                       ◀── streams build log live ──◀          HTML or React
-                       ◀──── serves /preview/ ─────◀
-```
-
-## Requirements
-
-- **Node.js 18+**
-- **Claude Code** installed and configured. ImagineCode reuses your existing Claude Code setup — any of these work:
-=======
  you                          ImagineCode                       the compiler
 ──────         ─────────────────────────────────────────      ─────────────
  write   ───▶   VS Code-style IDE (Monaco, explorer,     ───▶  Claude Code, or your
@@ -62,25 +49,11 @@ Introduction**.
   | **DeepSeek API** | An `sk-…` key | One streamed pass (OpenAI-compatible endpoint) |
 
   For Claude Code, any of these count as "configured":
->>>>>>> df90e14 (Changes)
   - a normal login (`claude` in a terminal → `/login`),
   - an `ANTHROPIC_API_KEY` environment variable,
   - **a third-party provider configured in `~/.claude/settings.json`** — the `env` block
     (`ANTHROPIC_BASE_URL` + `ANTHROPIC_API_KEY`) is loaded automatically, exactly like the real CLI does.
 
-<<<<<<< HEAD
-  The **⚡ Connect Claude Code** button verifies whichever one you use with a real round-trip.
-- Internet access (Monaco editor + React CDN are loaded from jsDelivr).
-
-## Run it
-
-```bash
-npm install
-npm start
-```
-
-Open **http://localhost:3333** — the IDE loads with two example imaginations:
-=======
   The **⚡ Connect** button in the status bar verifies whichever provider is selected with a real round-trip.
 - Internet access (Monaco editor + React CDN are loaded from jsDelivr).
 
@@ -93,16 +66,10 @@ npm run web      # the same IDE in your browser, on http://localhost:3333
 ```
 
 Either way the IDE loads with two example imaginations:
->>>>>>> df90e14 (Changes)
 
 - `bean-there.imagine` — a cozy coffee shop, written in prose-style imagination
 - `synthwave.dreamjs` — an invented curly-brace language for a neon playlist site
 
-<<<<<<< HEAD
-Click **⚡ Connect Claude Code** (status bar turns from purple to VS Code blue), open an example,
-press **▶ Run** (or `Ctrl+Enter` / `F5`), and watch the Imagine Terminal stream the compiler's
-thoughts until your site appears in the preview pane.
-=======
 Click **⚡ Connect Claude Code** (status bar turns from purple to VS Code blue) — or **🔑 Use your own
 API key instead…** to paste an Anthropic, OpenAI or DeepSeek key. Then open an example, press **▶ Run**
 (or `Ctrl+Enter` / `F5`), and watch the Imagine Terminal stream the compiler's thoughts until your site
@@ -172,17 +139,11 @@ spec off without deleting it.
   desktop app   %APPDATA%\ImagineCode\.imaginecode-rules.json
   from source   next to server.js
 ```
->>>>>>> df90e14 (Changes)
 
 ## Settings (gear icon or status-bar chips)
 
 | Setting | Options |
 |---|---|
-<<<<<<< HEAD
-| **Output format** | `HTML` (one self-contained page, default) or `React` (function components + hooks via CDN, no build step) |
-| **Compiler model** | `Sonnet 5 · medium reasoning` (default) · `Opus 4.8 · low reasoning` · `Haiku 4.5 · fast` |
-| **Standing build notes** | Instructions whispered to the compiler on every build ("always dark mode", "everything slightly magical") |
-=======
 | **Entry file** | The program the compiler starts from; every other file is a module |
 | **Output format** | `HTML` (one self-contained page, default) or `React` (function components + hooks via CDN, no build step) |
 | **Language rules** | Your syntax → meaning spec (above). Lives on its own page — `Ctrl+Shift+L` |
@@ -192,7 +153,6 @@ spec off without deleting it.
 
 The model lists above are a floor, not a ceiling — once a key is saved, **↻ models** merges your
 account's own `/v1/models` response on top, so anything released after this README still shows up.
->>>>>>> df90e14 (Changes)
 
 ## Keyboard
 
@@ -200,25 +160,13 @@ account's own `/v1/models` response on top, so anything released after this READ
 |---|---|
 | `Ctrl+Enter` / `F5` | Run imagination |
 | `Shift+F5` | Stop build |
-<<<<<<< HEAD
-=======
 | `Ctrl+Shift+L` | Language rules |
->>>>>>> df90e14 (Changes)
 | `Ctrl+S` | Save |
 | `Ctrl+Shift+P` / `F1` | Command palette |
 | `Ctrl+P` | Quick-open file |
 | `` Ctrl+` `` | Toggle Imagine Terminal |
 | `Ctrl+B` | Toggle sidebar |
 
-<<<<<<< HEAD
-## Project layout
-
-```
-server.js          Express + Claude Agent SDK "compiler" backend
-public/            the IDE (Monaco, VS Code Dark+ chrome)
-workspace/         your imagination files (any extension you invent)
-output/            the compiled website, served at /preview/
-=======
 ## Building the Windows app yourself
 
 ```bash
@@ -267,5 +215,4 @@ build/icon.svg            the app mark; icon-small.svg is the ≤48px variant
 scripts/make-icons.cjs    renders both SVGs with Chromium and packs build/icon.ico
 resources/seed-workspace/ the two examples a fresh install starts with
 workspace/ · output/      your files and your builds (from source; see above for the app)
->>>>>>> df90e14 (Changes)
 ```

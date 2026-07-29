@@ -5,12 +5,15 @@
       "name": "imaginecode",
       "runtimeExecutable": "node",
       "runtimeArgs": ["server.js"],
-<<<<<<< HEAD
-      "port": 3333
-=======
       "port": 3333,
       "autoPort": true
->>>>>>> df90e14 (Changes)
+    },
+    {
+      "name": "landing",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "4321", "--directory", "landing"],
+      "port": 4321,
+      "autoPort": true
     }
   ]
 }
